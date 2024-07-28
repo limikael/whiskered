@@ -1,0 +1,21 @@
+{
+  "name": "whiskered",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "katnip dev",
+    "dev": "katnip dev",
+    "postinstall": "katnip init"
+  },
+  "type": "module",
+  "version": "1.0.0",
+  "dependencies": {
+    "katnip-isoq": "^3.0.41",
+    "katnip-tailwind": "^3.0.34",
+    "katnip-watch": "^3.0.21",
+    "txml": "^5.1.1"
+  },
+  "exports": {
+    "./isomain": "./src/main/index.jsx"
+  }
+}
