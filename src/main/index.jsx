@@ -1,12 +1,12 @@
 import {useConstructor} from "../utils/react-util.jsx";
-import {parse as parseXml} from "txml/txml";
 import {useState} from "react";
-import {xmlIdfyNode} from "../whiskered/xml-util.js";
-import XmlView from "../whiskered/XmlView.jsx";
+import {xmlFragmentIdfy} from "../utils/xml-util.js";
+import WhiskerEd from "../whiskered/WhiskerEd.jsx";
+import {useWhiskerEdState} from "../whiskered/WhiskerEdState.js"
 
 let LIBRARY={
-	Hello({color, children, containerRef}) {
-		return (<div style={`border: 1px solid black; background-color: ${color}; margin: 10px`} ref={containerRef}>
+	Hello({color, children}) {
+		return (<div class="border p-5 m-5" style={`background-color: ${color};`}>
 			The hello component...
 			<div style="padding: 5px">
 				{children}
@@ -14,46 +14,60 @@ let LIBRARY={
 		</div>)
 	},
 
-	Test({color, containerRef}) {
-		return (<div style={`border: 1px solid black; background-color: ${color}`} ref={containerRef}>
+	Test({color}) {
+		return (<div class="border p-5 m-5" style={`background-color: ${color}`}>
 			The test component
 		</div>)
 	}
 }
 
+function ComponentLibrary({componentLibrary}) {
+	function ComponentLibraryItem({name, item}) {
+		return (
+			<div class="border m-5 p-5 bg-grey" draggable={true}>
+				{name}
+			</div>
+		);
+	}
+
+	return (<>
+		<div class="font-bold text-xl mb-2">Library</div>
+		<input type="text" class="border p-2 mb-2" value="dummy input"/>
+		{Object.keys(componentLibrary).map(name=>
+			<ComponentLibraryItem name={name} item={componentLibrary[name]}/>
+		)}
+	</>);
+}
+
 export default function() {
-	let xml=useConstructor(()=>xmlIdfyNode(parseXml(`
-		<Hello color="#ff0000">
-			<Test color="#80ff80"/>
-			<Test color="#ffff80"/>
-			<Test color="#ff80ff"/>
-		</Hello>
-	`)[0]));
-
-	let [selectedId,setSelectedId]=useState();
-	let [hoverId,setHoverId]=useState();
-
-	let highlightLibrary={
-		//"hover": {outlineStyle: "solid", outlineColor: "#8080ff", outlineWidth: "thin"},
-		"hover": {boxShadow: "inset 0px 5px #ff8040"},
-		"selected": {outlineStyle: "solid", outlineColor: "#ffff80", outlineWidth: "medium"}
-	};
-
-	let highlight={};
-	if (hoverId)
-		highlight[hoverId]=["hover"];
-
-	if (selectedId)
-		highlight[selectedId]=["selected"];
+	let whiskerEdState=useWhiskerEdState({
+		componentLibrary: LIBRARY,
+		xml: `
+			<Hello color="#e0d0c0">
+				<Test color="#ffc0c0"/>
+				<Test color="#c0c0ff"/>
+				<Test color="#c0ffc0"/>
+			</Hello>`,
+	});
 
 	return (
-		<XmlView 
-				componentLibrary={LIBRARY}
-				highlightLibrary={highlightLibrary}
-				highlight={highlight}
-				node={xml}
-				selectedId={selectedId}
-				onNodeClick={id=>setSelectedId(id)}
-				onHoverChange={id=>{setHoverId(id); console.log("hover: "+id)}}/>
+		<div class="flex">
+			<div class="w-60 shrink-0 p-5">
+				<ComponentLibrary componentLibrary={LIBRARY}/>
+			</div>
+			<WhiskerEd 
+					class="grow"
+					whiskerEdState={whiskerEdState}/>
+		</div>
 	);
 }
+
+/*
+			<WhiskerEd
+					class="grow"
+					componentLibrary={LIBRARY}
+					value={xml}
+					selection={selectedId}
+					onChange={value=>setXml(value)}
+					onSelectionChange={id=>setSelectedId(id)}/>
+*/

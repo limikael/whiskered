@@ -5,11 +5,13 @@
   "scripts": {
     "start": "katnip dev",
     "dev": "katnip dev",
+    "test": "jasmine",
     "postinstall": "katnip init"
   },
   "type": "module",
   "version": "1.0.0",
   "dependencies": {
+    "jasmine": "^5.2.0",
     "katnip-isoq": "^3.0.41",
     "katnip-tailwind": "^3.0.34",
     "katnip-watch": "^3.0.21",

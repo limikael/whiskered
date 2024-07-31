@@ -1,4 +1,4 @@
-import {useRef, useState, useLayoutEffect, useCallback} from "react";
+import {useRef, useState, useLayoutEffect, useCallback, cloneElement} from "react";
 
 export function useConstructor(fn) {
 	let value=useRef();
@@ -25,4 +25,12 @@ export function useEventUpdate(o, ev) {
 	let [_,setDummyState]=useState();
 	let forceUpdate=useCallback(()=>setDummyState({}));
 	useEventListener(o,ev,forceUpdate);
+}
+
+export function InterjectRender({interjectComponent, interjectProps, ...props}) {
+	let el=interjectComponent(props);
+	interjectProps(el.props);
+	el=cloneElement(el,el.props);
+
+	return el;
 }

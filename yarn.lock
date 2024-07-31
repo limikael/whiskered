@@ -488,7 +488,7 @@ glob-parent@^6.0.2:
   dependencies:
     is-glob "^4.0.3"
 
-glob@^10.3.10:
+glob@^10.2.2, glob@^10.3.10:
   version "10.4.5"
   resolved "https://registry.yarnpkg.com/glob/-/glob-10.4.5.tgz#f4d9f0b90ffdbab09c9d77f5f29b4262517b0956"
   integrity sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==
@@ -613,6 +613,19 @@ jackspeak@^3.1.2:
     "@isaacs/cliui" "^8.0.2"
   optionalDependencies:
     "@pkgjs/parseargs" "^0.11.0"
+
+jasmine-core@~5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-5.2.0.tgz#7d0aa4c26cb3dbaed201d0505489baf1e48faeca"
+  integrity sha512-tSAtdrvWybZkQmmaIoDgnvHG8ORUNw5kEVlO5CvrXj02Jjr9TZrmjFq7FUiOUzJiOP2wLGYT6PgrQgQF4R1xiw==
+
+jasmine@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-5.2.0.tgz#caa318ac1ccf966b2768e092137337621cdd3ca9"
+  integrity sha512-il+noV96N1BGU9/FMmc8QtAMxC8lPnXUiAvgb0o9MDZATRdxglTQe9wo6UdL049ropQL6MopDYwDlludKR6wJQ==
+  dependencies:
+    glob "^10.2.2"
+    jasmine-core "~5.2.0"
 
 jiti@^1.21.0:
   version "1.21.6"
