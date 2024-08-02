@@ -1,5 +1,6 @@
 import {useConstructor} from "../utils/react-util.jsx";
-import {xmlFragmentParse} from "../utils/xml-util.js";
+import {xmlFragmentParse, xmlNodeCreate, xmlFindNode} from "../utils/xml-util.js";
+import {elMidpoint, pDist, pSub, pDot} from "../utils/ui-util.js";
 
 export default class WhiskerEdState extends EventTarget {
 	constructor({xml, componentLibrary}={}) {
@@ -74,9 +75,59 @@ export default class WhiskerEdState extends EventTarget {
 			this.dispatchEvent(new Event("dragChange"));
 	}
 
-	setHoverId(id) {
+	setHoverId(id, insertIndex) {
+		if (id===this.hoverId && insertIndex===this.insertIndex)
+			return;
+
 		this.hoverId=id;
+		this.insertIndex=insertIndex;
 		this.dispatchEvent(new Event("hoverChange"));
+	}
+
+	getInsertIndex(fragment, mouseLocation) {
+		let closestIndex=undefined;
+		let closestDist=undefined;
+
+		for (let i=0; i<fragment.length; i++) {
+			let c=fragment[i];
+			let mid=elMidpoint(this.elById[c.id]);
+			let dist=pDist(mouseLocation,mid);
+			if (closestDist===undefined ||
+					dist<closestDist) {
+				closestIndex=i;
+				closestDist=dist;
+			}
+		}
+
+		let insertIndex=0;
+		if (closestIndex!==undefined) {
+			let c=fragment[closestIndex];
+			let mid=elMidpoint(this.elById[c.id]);
+			let v=pSub(mouseLocation,mid);
+			let dot=pDot({x:0,y:1},v);
+			if (dot<0)
+				insertIndex=closestIndex;
+
+			else
+				insertIndex=closestIndex+1;
+		}
+
+		return insertIndex;
+	}
+
+	updateHover(ev) {
+		let mouseLocation={x: ev.clientX, y: ev.clientY};
+		let id=this.getIdByEl(ev.target);
+		if (id) {
+			let node=xmlFindNode(this.getValueNode(),id);
+			let insertIndex=this.getInsertIndex(node.children,mouseLocation);
+			this.setHoverId(id,insertIndex);
+		}
+
+		else {
+			let insertIndex=this.getInsertIndex(this.value,mouseLocation);
+			this.setHoverId(undefined,insertIndex);
+		}
 	}
 
 	setValue(v) {
@@ -84,6 +135,18 @@ export default class WhiskerEdState extends EventTarget {
 			return;
 
 		this.value=v;
+		this.dispatchEvent(new Event("change"));
+	}
+
+	getValueNode() {
+		let top=xmlNodeCreate("top",{},this.value);
+		top.id="top";
+
+		return top;
+	}
+
+	setValueNode(valueNode) {
+		this.value=valueNode.children;
 		this.dispatchEvent(new Event("change"));
 	}
 }

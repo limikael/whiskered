@@ -4,6 +4,10 @@ export function xmlFragmentParse(text) {
 	return xmlFragmentIdfy(parseXml(text));
 }
 
+export function xmlNodeParse(text) {
+	return xmlNodeIdfy(parseXml(text)[0]);
+}
+
 export function xmlNodeIdfy(node) {
 	if (!node.id)
 		node.id=crypto.randomUUID();
@@ -40,4 +44,27 @@ export function xmlFragmentRemoveNode(fragment, id) {
 	return fragment
 		.filter(node=>node.id!=id)
 		.map(node=>xmlNodeRemoveNode(node,id));
+}
+
+/*export function xmlAppendChild(node, parentId, childNode) {
+	if (node.id==parentId) {
+		node.children.push(childNode)
+		return node;
+	}
+
+	for (let c of node.children)
+		xmlAppendChild(c,parentId,childNode);
+
+	return node;
+}*/
+
+export function xmlFindNode(node, id) {
+	if (id==node.id)
+		return node;
+
+	for (let c of node.children) {
+		let cand=xmlFindNode(c,id);
+		if (cand)
+			return cand;
+	}
 }

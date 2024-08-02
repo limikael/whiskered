@@ -14,22 +14,31 @@ let LIBRARY={
 		</div>)
 	},
 
-	Test({color}) {
+	Test({color, children}) {
 		return (<div class="border p-5 m-5" style={`background-color: ${color}`}>
 			The test component
+			<div style="padding: 5px">
+				{children}
+			</div>
 		</div>)
 	}
 }
 
-function ComponentLibrary({componentLibrary}) {
-	function ComponentLibraryItem({name, item}) {
-		return (
-			<div class="border m-5 p-5 bg-grey" draggable={true}>
-				{name}
-			</div>
-		);
+function ComponentLibraryItem({name, item}) {
+	function handleDragStart(ev) {
+		ev.dataTransfer.setData("whiskered",`<${name}/>`);
 	}
 
+	return (
+		<div class="border m-5 p-5 bg-grey"
+				draggable={true}
+				onDragStart={handleDragStart}>
+			{name}
+		</div>
+	);
+}
+
+function ComponentLibrary({componentLibrary}) {
 	return (<>
 		<div class="font-bold text-xl mb-2">Library</div>
 		<input type="text" class="border p-2 mb-2" value="dummy input"/>
@@ -47,11 +56,13 @@ export default function() {
 				<Test color="#ffc0c0"/>
 				<Test color="#c0c0ff"/>
 				<Test color="#c0ffc0"/>
-			</Hello>`,
+			</Hello>
+			<Hello color="#ff0000/>
+		`,
 	});
 
 	return (
-		<div class="flex">
+		<div class="flex absolute top-0 left-0 h-full w-full">
 			<div class="w-60 shrink-0 p-5">
 				<ComponentLibrary componentLibrary={LIBRARY}/>
 			</div>
@@ -61,13 +72,3 @@ export default function() {
 		</div>
 	);
 }
-
-/*
-			<WhiskerEd
-					class="grow"
-					componentLibrary={LIBRARY}
-					value={xml}
-					selection={selectedId}
-					onChange={value=>setXml(value)}
-					onSelectionChange={id=>setSelectedId(id)}/>
-*/
