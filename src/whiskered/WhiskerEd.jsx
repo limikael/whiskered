@@ -132,6 +132,8 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 	}
 
 	function handleDrop(ev) {
+		//console.log("***** DROP");
+
 		ev.preventDefault();
 
 		let dropData=ev.dataTransfer.getData("whiskered");
@@ -166,8 +168,8 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 				onMouseDown={handleMouseDown}
 				onFocus={()=>whiskerEdState.setFocusState(true)}
 				onBlur={()=>whiskerEdState.setFocusState(false)}
-				onDragEnter={()=>whiskerEdState.changeDragCount(1)}
-				onDragLeave={()=>whiskerEdState.changeDragCount(-1)}
+				onDragEnter={(ev)=>whiskerEdState.changeDragCount(1,ev)}
+				onDragLeave={(ev)=>whiskerEdState.changeDragCount(-1,ev)}
 				onMouseMove={handleMouseMove}
 				onDragOver={handleMouseMove}
 				onKeyDown={handleKeyDown}

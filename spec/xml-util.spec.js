@@ -8,6 +8,6 @@ describe("xml util",()=>{
 			xmlNodeCreate("bla")
 		])];
 
-		console.log(xmlFragmentRemoveNode(fragment,el.id));
+		//console.log(xmlFragmentRemoveNode(fragment,el.id));
 	});
 })

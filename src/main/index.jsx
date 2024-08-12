@@ -66,9 +66,11 @@ export default function() {
 			<div class="w-60 shrink-0 p-5">
 				<ComponentLibrary componentLibrary={LIBRARY}/>
 			</div>
-			<WhiskerEd 
-					class="grow"
-					whiskerEdState={whiskerEdState}/>
+			<div class="grow relative">
+				<WhiskerEd 
+						class="absolute top-0 bottom-0 left-0 right-0 overflow-auto"
+						whiskerEdState={whiskerEdState}/>
+			</div>
 		</div>
 	);
 }

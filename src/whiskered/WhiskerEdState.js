@@ -57,7 +57,10 @@ export default class WhiskerEdState extends EventTarget {
 		return (this.dragCount>0);
 	}
 
-	changeDragCount(v) {
+	changeDragCount(v, ev) {
+		ev.preventDefault();
+
+		//console.log("change drag count: "+v);
 		let prev=this.getDragState();
 		this.dragCount+=v;
 		if (this.dragCount<0)
