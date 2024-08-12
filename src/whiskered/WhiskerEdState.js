@@ -1,38 +1,37 @@
 import {useConstructor} from "../utils/react-util.jsx";
-import {xmlFragmentParse, xmlNodeCreate, xmlFindNode} from "../utils/xml-util.js";
-import {elMidpoint, pDist, pSub, pDot} from "../utils/ui-util.js";
+import {xmlFragmentParse, xmlNodeCreate, xmlFindNode, xmlFindParentNode} from "../utils/xml-util.js";
+import {elMidpoint, pDist, pSub, pDot, elIsOnEdge} from "../utils/ui-util.js";
+import BidirectionalMap from "../utils/BidirectionalMap.js";
 
 export default class WhiskerEdState extends EventTarget {
-	constructor({xml, componentLibrary}={}) {
+	constructor({xml, componentLibrary, edgeSize}={}) {
 		super();
 		this.value=[];
 		if (xml)
 			this.value=xmlFragmentParse(xml);
 
 		this.componentLibrary=componentLibrary;
-
-		this.elById={};
-		this.idByEl=new Map();
+		this.elById=new BidirectionalMap();
 		this.dragCount=0;
+		this.hoverState={};
+		this.edgeSize=edgeSize;
+
+		if (this.edgeSize===undefined)
+			this.edgeSize=5;
 	}
 
 	setNodeEl(nodeId, el) {
-		if (this.elById[nodeId]) {
-			let currentEl=this.elById[nodeId];
-			this.idByEl.delete(el);
-			delete this.elById[nodeId];
+		if (!el) {
+			this.elById.delete(nodeId)
+			return;
 		}
 
-		if (!el)
-			return;
-
-		this.elById[nodeId]=el;
-		this.idByEl.set(el,nodeId);
+		this.elById.set(nodeId,el);
 	}
 
 	getIdByEl(el) {
 		while (el) {
-			let id=this.idByEl.get(el)
+			let id=this.elById.getKey(el)
 			if (id)
 				return id;
 
@@ -78,12 +77,15 @@ export default class WhiskerEdState extends EventTarget {
 			this.dispatchEvent(new Event("dragChange"));
 	}
 
-	setHoverId(id, insertIndex) {
-		if (id===this.hoverId && insertIndex===this.insertIndex)
+	setHoverState({hoverId, dropParentId, dropInsertIndex}) {
+		if (hoverId===this.hoverId && 
+				dropParentId===this.dropParentId &&
+				dropInsertIndex===this.dropInsertIndex)
 			return;
 
-		this.hoverId=id;
-		this.insertIndex=insertIndex;
+		this.hoverId=hoverId;
+		this.dropParentId=dropParentId;
+		this.dropInsertIndex=dropInsertIndex;
 		this.dispatchEvent(new Event("hoverChange"));
 	}
 
@@ -93,7 +95,7 @@ export default class WhiskerEdState extends EventTarget {
 
 		for (let i=0; i<fragment.length; i++) {
 			let c=fragment[i];
-			let mid=elMidpoint(this.elById[c.id]);
+			let mid=elMidpoint(this.elById.get(c.id));
 			let dist=pDist(mouseLocation,mid);
 			if (closestDist===undefined ||
 					dist<closestDist) {
@@ -105,7 +107,7 @@ export default class WhiskerEdState extends EventTarget {
 		let insertIndex=0;
 		if (closestIndex!==undefined) {
 			let c=fragment[closestIndex];
-			let mid=elMidpoint(this.elById[c.id]);
+			let mid=elMidpoint(this.elById.get(c.id));
 			let v=pSub(mouseLocation,mid);
 			let dot=pDot({x:0,y:1},v);
 			if (dot<0)
@@ -119,18 +121,39 @@ export default class WhiskerEdState extends EventTarget {
 	}
 
 	updateHover(ev) {
+		//console.log("update hover");
+
 		let mouseLocation={x: ev.clientX, y: ev.clientY};
-		let id=this.getIdByEl(ev.target);
-		if (id) {
-			let node=xmlFindNode(this.getValueNode(),id);
-			let insertIndex=this.getInsertIndex(node.children,mouseLocation);
-			this.setHoverId(id,insertIndex);
+		let hoverId=this.getIdByEl(ev.target);
+		let dropParentId=hoverId;
+
+		if (dropParentId) {
+			let onEdge=elIsOnEdge(this.elById.get(dropParentId),mouseLocation,this.edgeSize);
+			if (onEdge) {
+				let node=xmlFindParentNode(this.getValueNode(),dropParentId);
+				if (node)
+					dropParentId=node.id;
+
+				else
+					dropParentId=undefined;
+			}
+		}
+
+		let dropInsertIndex;
+		if (dropParentId) {
+			let node=xmlFindNode(this.getValueNode(),dropParentId);
+			dropInsertIndex=this.getInsertIndex(node.children,mouseLocation);
 		}
 
 		else {
-			let insertIndex=this.getInsertIndex(this.value,mouseLocation);
-			this.setHoverId(undefined,insertIndex);
+			dropInsertIndex=this.getInsertIndex(this.value,mouseLocation);
 		}
+
+		this.setHoverState({
+			hoverId: hoverId,
+			dropParentId: dropParentId,
+			dropInsertIndex: dropInsertIndex
+		});
 	}
 
 	setValue(v) {
@@ -143,7 +166,7 @@ export default class WhiskerEdState extends EventTarget {
 
 	getValueNode() {
 		let top=xmlNodeCreate("top",{},this.value);
-		top.id="top";
+		top.id=undefined;
 
 		return top;
 	}

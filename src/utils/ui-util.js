@@ -6,6 +6,21 @@ export function elMidpoint(el) {
 	};
 }
 
+export function elIsOnEdge(el, p, edgeSize) {
+	let rect=el.getBoundingClientRect();
+	let hEdgeSize=Math.min(edgeSize,rect.width/4);
+	let vEdgeSize=Math.min(edgeSize,rect.height/4);
+
+	//console.log(hEdgeSize);
+
+	return (
+		p.x<rect.left+hEdgeSize ||
+		p.x>rect.right-hEdgeSize ||
+		p.y<rect.top+vEdgeSize ||
+		p.y>rect.bottom-vEdgeSize
+	);
+}
+
 export function pDist(a, b) {
 	let x=a.x-b.x;
 	let y=a.y-b.y;

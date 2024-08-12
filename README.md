@@ -1,11 +1,11 @@
 Todo:
 
-- dragdrop edge
+x dragdrop edge
 - drag to reorder
 - containerType
 - content editable
 - layout direction
 
 Refactor:
-- mousestate (does it fix the bug?)
-- bidirectional map
+x mousestate (does it fix the bug?)
+x bidirectional map

@@ -77,25 +77,25 @@ function createWhiskerEdClasses(whiskerEdState) {
 
 	if (whiskerEdState.getDragState()) {
 		let fragment=whiskerEdState.value;
-		if (whiskerEdState.hoverId) {
-			let node=xmlFindNode(whiskerEdState.getValueNode(),whiskerEdState.hoverId);
+		if (whiskerEdState.dropParentId) {
+			let node=xmlFindNode(whiskerEdState.getValueNode(),whiskerEdState.dropParentId);
 			fragment=node.children;
 		}
 
 		if (fragment.length>0) {
-			if (whiskerEdState.insertIndex>=fragment.length) {
+			if (whiskerEdState.dropInsertIndex>=fragment.length) {
 				let id=fragment[fragment.length-1].id;
 				addClass(id,"ed-drag-bottom");
 			}
 
 			else {
-				let id=fragment[whiskerEdState.insertIndex].id;
+				let id=fragment[whiskerEdState.dropInsertIndex].id;
 				addClass(id,"ed-drag-top");
 			}
 		}
 
 		else {
-			addClass(whiskerEdState.hoverId,"ed-drag");
+			addClass(whiskerEdState.dropParentId,"ed-drag");
 		}
 	}
 
@@ -140,10 +140,10 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 		let child=xmlNodeParse(dropData);
 		let valueNode=whiskerEdState.getValueNode();
 		let parentNode=valueNode;
-		if (whiskerEdState.hoverId)
-			parentNode=xmlFindNode(valueNode,whiskerEdState.hoverId);
+		if (whiskerEdState.dropParentId)
+			parentNode=xmlFindNode(valueNode,whiskerEdState.dropParentId);
 
-		parentNode.children.splice(whiskerEdState.insertIndex,0,child);
+		parentNode.children.splice(whiskerEdState.dropInsertIndex,0,child);
 		whiskerEdState.setValueNode(valueNode);
 
 		whiskerEdState.clearDragState();
@@ -153,7 +153,7 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 		cls=classStringAdd(cls,"ed-focus");
 
 	if (whiskerEdState.getDragState() &&
-			!whiskerEdState.hoverId &&
+			!whiskerEdState.dropParentId &&
 			!whiskerEdState.value.length)
 		cls=classStringAdd(cls,"ed-drag");
 

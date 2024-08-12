@@ -15,7 +15,7 @@ let LIBRARY={
 	},
 
 	Test({color, children}) {
-		return (<div class="border p-5 m-5" style={`background-color: ${color}`}>
+		return (<div class="border p-5" style={`background-color: ${color}`}>
 			The test component
 			<div style="padding: 5px">
 				{children}
