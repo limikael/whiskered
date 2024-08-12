@@ -11,7 +11,7 @@ export function elIsOnEdge(el, p, edgeSize) {
 	let hEdgeSize=Math.min(edgeSize,rect.width/4);
 	let vEdgeSize=Math.min(edgeSize,rect.height/4);
 
-	//console.log(hEdgeSize);
+	//console.log(vEdgeSize);
 
 	return (
 		p.x<rect.left+hEdgeSize ||

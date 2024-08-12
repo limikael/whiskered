@@ -1,5 +1,6 @@
 import {useConstructor} from "../utils/react-util.jsx";
-import {xmlFragmentParse, xmlNodeCreate, xmlFindNode, xmlFindParentNode} from "../utils/xml-util.js";
+import {xmlFragmentParse, xmlNodeCreate, xmlFindNode, 
+		xmlFindParentNode, xmlFindParentNodeId} from "../utils/xml-util.js";
 import {elMidpoint, pDist, pSub, pDot, elIsOnEdge} from "../utils/ui-util.js";
 import BidirectionalMap from "../utils/BidirectionalMap.js";
 
@@ -77,21 +78,29 @@ export default class WhiskerEdState extends EventTarget {
 			this.dispatchEvent(new Event("dragChange"));
 	}
 
-	setHoverState({hoverId, dropParentId, dropInsertIndex}) {
+	setHoverState({hoverId, dropParentId, dropInsertIndex, dropLayoutDirection}) {
 		if (hoverId===this.hoverId && 
 				dropParentId===this.dropParentId &&
-				dropInsertIndex===this.dropInsertIndex)
+				dropInsertIndex===this.dropInsertIndex &&
+				dropLayoutDirection===this.dropLayoutDirection)
 			return;
 
 		this.hoverId=hoverId;
 		this.dropParentId=dropParentId;
 		this.dropInsertIndex=dropInsertIndex;
+		this.dropLayoutDirection=dropLayoutDirection;
 		this.dispatchEvent(new Event("hoverChange"));
 	}
 
-	getInsertIndex(fragment, mouseLocation) {
+	getInsertIndex(fragment, mouseLocation, layoutDirection) {
 		let closestIndex=undefined;
 		let closestDist=undefined;
+		let layoutVectors={
+			up: {x:0,y:-1},
+			right: {x:1,y:0},
+			down: {x:0,y:1},
+			left: {x:-1,y:0},
+		}
 
 		for (let i=0; i<fragment.length; i++) {
 			let c=fragment[i];
@@ -109,7 +118,7 @@ export default class WhiskerEdState extends EventTarget {
 			let c=fragment[closestIndex];
 			let mid=elMidpoint(this.elById.get(c.id));
 			let v=pSub(mouseLocation,mid);
-			let dot=pDot({x:0,y:1},v);
+			let dot=pDot(layoutVectors[layoutDirection],v);
 			if (dot<0)
 				insertIndex=closestIndex;
 
@@ -129,30 +138,37 @@ export default class WhiskerEdState extends EventTarget {
 
 		if (dropParentId) {
 			let onEdge=elIsOnEdge(this.elById.get(dropParentId),mouseLocation,this.edgeSize);
-			if (onEdge) {
-				let node=xmlFindParentNode(this.getValueNode(),dropParentId);
-				if (node)
-					dropParentId=node.id;
-
-				else
-					dropParentId=undefined;
-			}
+			if (onEdge)
+				dropParentId=xmlFindParentNodeId(this.getValueNode(),dropParentId);
 		}
 
+		if (dropParentId) {
+			let node=xmlFindNode(this.getValueNode(),dropParentId);
+			let Comp=this.componentLibrary[node.tagName];
+			if (Comp.containerType!="children")
+				dropParentId=xmlFindParentNodeId(this.getValueNode(),dropParentId);
+		}
+
+		let dropLayoutDirection="down";
 		let dropInsertIndex;
 		if (dropParentId) {
 			let node=xmlFindNode(this.getValueNode(),dropParentId);
-			dropInsertIndex=this.getInsertIndex(node.children,mouseLocation);
+			let Comp=this.componentLibrary[node.tagName];
+			if (Comp.layoutDirection)
+				dropLayoutDirection=Comp.layoutDirection;
+
+			dropInsertIndex=this.getInsertIndex(node.children,mouseLocation,dropLayoutDirection);
 		}
 
 		else {
-			dropInsertIndex=this.getInsertIndex(this.value,mouseLocation);
+			dropInsertIndex=this.getInsertIndex(this.value,mouseLocation,dropLayoutDirection);
 		}
 
 		this.setHoverState({
 			hoverId: hoverId,
 			dropParentId: dropParentId,
-			dropInsertIndex: dropInsertIndex
+			dropInsertIndex: dropInsertIndex,
+			dropLayoutDirection: dropLayoutDirection
 		});
 	}
 

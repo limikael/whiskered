@@ -21,8 +21,20 @@ let LIBRARY={
 				{children}
 			</div>
 		</div>)
-	}
+	},
+
+	Flex({children}) {
+		return (<div class="border" style={`background-color: #ffc0c0;`}>
+			<div style="padding: 5px; display: flex">
+				{children}
+			</div>
+		</div>)
+	},
 }
+
+LIBRARY.Hello.containerType="children";
+LIBRARY.Flex.containerType="children";
+LIBRARY.Flex.layoutDirection="right";
 
 function ComponentLibraryItem({name, item}) {
 	function handleDragStart(ev) {

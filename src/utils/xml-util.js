@@ -72,3 +72,11 @@ export function xmlFindParentNode(node, id) {
 			return cand;
 	}
 }
+
+export function xmlFindParentNodeId(node, id) {
+	let parentNode=xmlFindParentNode(node,id);
+	if (!parentNode)
+		return;
+
+	return parentNode.id;
+}

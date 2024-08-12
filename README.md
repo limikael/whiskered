@@ -1,10 +1,10 @@
 Todo:
 
 x dragdrop edge
+x containerType
+x layout direction
 - drag to reorder
-- containerType
 - content editable
-- layout direction
 
 Refactor:
 x mousestate (does it fix the bug?)

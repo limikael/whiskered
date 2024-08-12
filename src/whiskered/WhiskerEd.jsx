@@ -19,6 +19,14 @@ function WhiskerEdStyle() {
 				box-shadow: 0px 4px 0 0px #ff8040;
 			}
 
+			.ed-drag-left {
+				box-shadow: -4px 0px 0 0px #ff8040;
+			}
+
+			.ed-drag-right {
+				box-shadow: 4px 0px 0 0px #ff8040;
+			}
+
 			.ed-select {
 				outline: 4px solid rgba(255,128,64,.5);
 			}
@@ -83,14 +91,23 @@ function createWhiskerEdClasses(whiskerEdState) {
 		}
 
 		if (fragment.length>0) {
+			let directionDropClasses={
+				"up": ["ed-drag-bottom","ed-drag-top"],
+				"right": ["ed-drag-left","ed-drag-right"],
+				"down": ["ed-drag-top","ed-drag-bottom"],
+				"left": ["ed-drag-right","ed-drag-left"],
+			}
+
+			let dropClasses=directionDropClasses[whiskerEdState.dropLayoutDirection];
+
 			if (whiskerEdState.dropInsertIndex>=fragment.length) {
 				let id=fragment[fragment.length-1].id;
-				addClass(id,"ed-drag-bottom");
+				addClass(id,dropClasses[1]);
 			}
 
 			else {
 				let id=fragment[whiskerEdState.dropInsertIndex].id;
-				addClass(id,"ed-drag-top");
+				addClass(id,dropClasses[0]);
 			}
 		}
 
