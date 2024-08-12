@@ -23,6 +23,12 @@ let LIBRARY={
 		</div>)
 	},
 
+	Inline() {
+		return (<div class="border p-5 inline-block" style={`background-color: #88f`}>
+			Inline
+		</div>)
+	},
+
 	Flex({children}) {
 		return (<div class="border" style={`background-color: #ffc0c0;`}>
 			<div style="padding: 5px; display: flex">
