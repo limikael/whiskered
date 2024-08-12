@@ -1,8 +1,10 @@
 import {useConstructor} from "../utils/react-util.jsx";
 import {xmlFragmentParse, xmlNodeCreate, xmlFindNode, 
-		xmlFindParentNode, xmlFindParentNodeId} from "../utils/xml-util.js";
+		xmlFindParentNode, xmlFindParentNodeId, xmlFindNodePath,
+		xmlNodeFindChildIndex} from "../utils/xml-util.js";
 import {elMidpoint, pDist, pSub, pDot, elIsOnEdge} from "../utils/ui-util.js";
 import BidirectionalMap from "../utils/BidirectionalMap.js";
+import {txmlStringify} from "../utils/txml-stringify.js";
 
 export default class WhiskerEdState extends EventTarget {
 	constructor({xml, componentLibrary, edgeSize}={}) {
@@ -57,6 +59,10 @@ export default class WhiskerEdState extends EventTarget {
 		return (this.dragCount>0);
 	}
 
+	isValidDrag() {
+		return (this.getDragState() && this.dropParentId!="illegal")
+	}
+
 	changeDragCount(v, ev) {
 		ev.preventDefault();
 
@@ -72,10 +78,32 @@ export default class WhiskerEdState extends EventTarget {
 
 	clearDragState() {
 		let prev=this.getDragState();
-		this.dragCount=0;
+		let prevDragId=this.dragId;
 
-		if (this.getDragState()!=prev)
+		this.dragCount=0;
+		this.dragId=undefined;
+
+		if (this.getDragState()!=prev || prevDragId)
 			this.dispatchEvent(new Event("dragChange"));
+	}
+
+	handleDragStart(ev) {
+		if (this.dragId)
+			return;
+
+		this.dragId=this.getIdByEl(ev.target);
+		let dragNode=xmlFindNode(this.getValueNode(),this.dragId);
+		let xml=txmlStringify([dragNode]);
+
+		//console.log("drag start: "+xml);
+		ev.dataTransfer.setData("whiskered",xml);
+	}
+
+	handleDragEnd(ev) {
+		if (!this.dragId)
+			return;
+
+		this.clearDragState();
 	}
 
 	setHoverState({hoverId, dropParentId, dropInsertIndex, dropLayoutDirection}) {
@@ -130,7 +158,7 @@ export default class WhiskerEdState extends EventTarget {
 	}
 
 	updateHover(ev) {
-		//console.log("update hover");
+		//console.log("update hover, dragId="+this.dragId);
 
 		let mouseLocation={x: ev.clientX, y: ev.clientY};
 		let hoverId=this.getIdByEl(ev.target);
@@ -149,6 +177,17 @@ export default class WhiskerEdState extends EventTarget {
 				dropParentId=xmlFindParentNodeId(this.getValueNode(),dropParentId);
 		}
 
+		let path=xmlFindNodePath(this.getValueNode(),dropParentId);
+		let pathIds=path.map(n=>n.id);
+		if (this.dragId && pathIds.includes(this.dragId)) {
+			this.setHoverState({
+				hoverId: hoverId,
+				dropParentId: "illegal",
+			});
+
+			return;
+		}
+
 		let dropLayoutDirection="down";
 		let dropInsertIndex;
 		if (dropParentId) {
@@ -162,6 +201,22 @@ export default class WhiskerEdState extends EventTarget {
 
 		else {
 			dropInsertIndex=this.getInsertIndex(this.value,mouseLocation,dropLayoutDirection);
+		}
+
+		if (this.dragId) {
+			let dragParentNode=xmlFindParentNode(this.getValueNode(),this.dragId);
+			if (dragParentNode.id==dropParentId) {
+				let currentIndex=xmlNodeFindChildIndex(dragParentNode,this.dragId);
+				if (dropInsertIndex==currentIndex ||
+						dropInsertIndex==currentIndex+1) {
+					this.setHoverState({
+						hoverId: hoverId,
+						dropParentId: "illegal",
+					});
+
+					return;
+				}
+			}
 		}
 
 		this.setHoverState({

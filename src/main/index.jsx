@@ -73,7 +73,9 @@ export default function() {
 			<Hello color="#e0d0c0">
 				<Test color="#ffc0c0"/>
 				<Test color="#c0c0ff"/>
-				<Test color="#c0ffc0"/>
+				<Hello color="#ffffc0">
+					<Test color="#c0ffc0"/>
+				</Hello>
 			</Hello>
 			<Hello color="#ff0000/>
 		`,

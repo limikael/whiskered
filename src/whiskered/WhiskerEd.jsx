@@ -1,7 +1,8 @@
 import {classStringAdd} from "../utils/js-util.js";
 import {InterjectRender} from "../utils/react-util.jsx";
 import {useEventUpdate} from "../utils/react-util.jsx";
-import {xmlFragmentRemoveNode, xmlNodeParse, xmlAppendChild, xmlFindNode} from "../utils/xml-util.js";
+import {xmlFragmentRemoveNode, xmlNodeParse, xmlAppendChild, xmlFindNode,
+		xmlNodeRemoveNode} from "../utils/xml-util.js";
 
 function WhiskerEdStyle() {
 	return (
@@ -55,6 +56,9 @@ function WhiskerEdNode({node, whiskerEdState, classes}) {
 
 	function interjectProps(props) {
 		props.ref=el=>whiskerEdState.setNodeEl(node.id,el);
+		props.draggable=true;
+		props.onDragStart=ev=>whiskerEdState.handleDragStart(ev);
+		props.onDragEnd=ev=>whiskerEdState.handleDragEnd(ev);
 
 		if (classes[node.id])
 			props.class=classStringAdd(props.class,classes[node.id]);
@@ -83,7 +87,7 @@ function createWhiskerEdClasses(whiskerEdState) {
 			!whiskerEdState.getDragState())
 		addClass(whiskerEdState.selectedId,"ed-select");
 
-	if (whiskerEdState.getDragState()) {
+	if (whiskerEdState.isValidDrag()) {
 		let fragment=whiskerEdState.value;
 		if (whiskerEdState.dropParentId) {
 			let node=xmlFindNode(whiskerEdState.getValueNode(),whiskerEdState.dropParentId);
@@ -132,7 +136,8 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 	}
 
 	function handleMouseMove(ev) {
-		ev.preventDefault();
+		if (ev.type=="dragover")
+			ev.preventDefault();
 
 		whiskerEdState.updateHover(ev);
 	}
@@ -154,6 +159,12 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 		ev.preventDefault();
 
 		let dropData=ev.dataTransfer.getData("whiskered");
+		if (!dropData ||
+				!whiskerEdState.isValidDrag()) {
+			whiskerEdState.clearDragState();
+			return;
+		}
+
 		let child=xmlNodeParse(dropData);
 		let valueNode=whiskerEdState.getValueNode();
 		let parentNode=valueNode;
@@ -161,6 +172,10 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 			parentNode=xmlFindNode(valueNode,whiskerEdState.dropParentId);
 
 		parentNode.children.splice(whiskerEdState.dropInsertIndex,0,child);
+
+		if (whiskerEdState.dragId)
+			xmlNodeRemoveNode(valueNode,whiskerEdState.dragId);
+
 		whiskerEdState.setValueNode(valueNode);
 
 		whiskerEdState.clearDragState();
@@ -169,15 +184,13 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 	if (whiskerEdState.focusState)
 		cls=classStringAdd(cls,"ed-focus");
 
-	if (whiskerEdState.getDragState() &&
+	if (whiskerEdState.isValidDrag() &&
 			!whiskerEdState.dropParentId &&
 			!whiskerEdState.value.length)
 		cls=classStringAdd(cls,"ed-drag");
 
 	else
 		cls=classStringAdd(cls,"outline-none");
-
-	//console.log("render");
 
 	return (
 		<div class={classStringAdd(cls,"!cursor-default !select-none")}

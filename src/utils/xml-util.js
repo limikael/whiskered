@@ -73,10 +73,30 @@ export function xmlFindParentNode(node, id) {
 	}
 }
 
+export function xmlFindNodePath(node, id) {
+	if (id==node.id)
+		return [node];
+
+	for (let c of node.children) {
+		let path=xmlFindNodePath(c,id);
+		if (path)
+			return [node,...path];
+	}
+}
+
 export function xmlFindParentNodeId(node, id) {
 	let parentNode=xmlFindParentNode(node,id);
 	if (!parentNode)
 		return;
 
 	return parentNode.id;
+}
+
+export function xmlNodeFindChildIndex(node, childId) {
+	for (let i=0; i<node.children.length; i++) {
+		if (node.children[i].id==childId)
+			return i;
+	}
+
+	return -1;
 }
