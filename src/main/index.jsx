@@ -1,8 +1,8 @@
 import {useConstructor} from "../utils/react-util.jsx";
 import {useState} from "react";
-import {xmlFragmentIdfy} from "../utils/xml-util.js";
 import WhiskerEd from "../whiskered/WhiskerEd.jsx";
 import {useWhiskerEdState} from "../whiskered/WhiskerEdState.js"
+import {parse as parseXml} from "txml/txml";
 
 let LIBRARY={
 	Hello({color, children}) {
@@ -40,7 +40,6 @@ let LIBRARY={
 	Text({children}) {
 		return (
 			<div class="border p-5">
-				Here is some text...
 				{children}
 			</div>
 		)
@@ -77,24 +76,27 @@ function ComponentLibrary({componentLibrary}) {
 }
 
 export default function() {
-	let whiskerEdState=useWhiskerEdState({
-		componentLibrary: LIBRARY,
-		xml: `
-			<Hello color="#e0d0c0">
-				<Test color="#ffc0c0"/>
-				<Test color="#c0c0ff"/>
-				<Hello color="#ffffc0">
-					<Test color="#c0ffc0"/>
-				</Hello>
+	/*let [value,setValue]=useState(()=>parseXml(`
+		<Hello color="#e0d0c0">
+			<Test color="#ffc0c0"/>
+			<Test color="#c0c0ff"/>
+			<Hello color="#ffffc0">
+				<Test color="#c0ffc0"/>
 			</Hello>
-			<Hello color="#ff0000/>
-		`,
-		/*xml: `
-			<Hello color="#e0d0c0">
-				<Text>Hello <b>World</b></Text>
-			</Hello>
-		`,*/
-	});
+		</Hello>
+		<Hello color="#ff0000/>
+	`));*/
+
+	let [value,setValue]=useState(()=>parseXml(`
+		<Hello color="#e0d0c0">
+			<Text>
+				he<b>ll</b>o world
+			</Text>
+		</Hello>
+		<Text>
+			hello world again
+		</Text>
+	`));
 
 	return (
 		<div class="flex absolute top-0 left-0 h-full w-full">
@@ -103,8 +105,9 @@ export default function() {
 			</div>
 			<div class="grow relative">
 				<WhiskerEd 
-						class="absolute top-0 bottom-0 left-0 right-0 overflow-auto"
-						whiskerEdState={whiskerEdState}/>
+						value={value}
+						componentLibrary={LIBRARY}
+						class="absolute top-0 bottom-0 left-0 right-0 overflow-auto"/>
 			</div>
 		</div>
 	);
