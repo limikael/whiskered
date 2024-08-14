@@ -27,6 +27,13 @@ export function useEventUpdate(o, ev) {
 	useEventListener(o,ev,forceUpdate);
 }
 
+export function useForceUpdate() {
+	let [_,setDummyState]=useState();
+	let forceUpdate=useCallback(()=>setDummyState({}));
+
+	return forceUpdate;
+}
+
 export function InterjectRender({interjectComponent, interjectProps, ...props}) {
 	let el=interjectComponent(props);
 	interjectProps(el.props);

@@ -61,6 +61,10 @@ function txmlStringifyFragment(fragment, indent=0) {
 	return s;
 }
 
-export function txmlStringify(fragment) {
-	return txmlStringifyFragment(fragment);
+export function txmlStringify(element) {
+	if (Array.isArray(element))
+		return txmlStringifyFragment(element);
+
+	else
+		return txmlStringifyNode(element);
 }

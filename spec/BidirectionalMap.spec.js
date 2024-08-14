@@ -6,6 +6,6 @@ describe("BidirectionalMap",()=>{
 
 		m.set("key",undefined);
 		m.deleteValue(undefined);
-		console.log(m.getKey(undefined));
+		//console.log(m.getKey(undefined));
 	});
 })

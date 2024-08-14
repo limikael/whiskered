@@ -1,105 +1,102 @@
 import {parse as parseXml} from "txml/txml";
 
-export function xmlFragmentParse(text) {
-	return xmlFragmentIdfy(parseXml(text));
-}
-
-export function xmlNodeParse(text) {
-	return xmlNodeIdfy(parseXml(text)[0]);
-}
-
-export function xmlNodeIdfy(node) {
-	if (typeof node=="string")
-		return node;
-
-	if (!node.id)
-		node.id=crypto.randomUUID();
-
-	xmlFragmentIdfy(node.children);
-
-	return node;
-}
-
-export function xmlFragmentIdfy(fragment) {
-	for (let i=0; i<fragment.length; i++)
-		fragment[i]=xmlNodeIdfy(fragment[i]);
-
-	return fragment;
-}
-
-export function xmlNodeCreate(tagName, attributes, children) {
-	return xmlNodeIdfy({
-		tagName: tagName,
-		attributes: attributes?attributes:{},
-		children: children?children:[]
-	});
-}
-
-export function xmlNodeRemoveNode(node, id) {
-	if (node.id==id)
-		throw new Error("Can't remove self!");
-
-	node.children=xmlFragmentRemoveNode(node.children,id);
-	return node;
-}
-
-export function xmlFragmentRemoveNode(fragment, id) {
-	return fragment
-		.filter(node=>node.id!=id)
-		.map(node=>xmlNodeRemoveNode(node,id));
-}
-
-export function xmlFindNode(node, id) {
-	if (id==node.id)
-		return node;
-
-	for (let c of node.children) {
-		let cand=xmlFindNode(c,id);
-		if (cand)
-			return cand;
-	}
-}
-
-export function xmlFindParentNode(node, id) {
-	if (id==node.id)
-		throw new Error("Finding parent in itself");
-
-	for (let c of node.children) {
-		if (c.id==id)
-			return node;
-	}
-
-	for (let c of node.children) {
-		let cand=xmlFindParentNode(c,id);
-		if (cand)
-			return cand;
-	}
-}
-
-export function xmlFindNodePath(node, id) {
-	if (id==node.id)
-		return [node];
-
-	for (let c of node.children) {
-		let path=xmlFindNodePath(c,id);
-		if (path)
-			return [node,...path];
-	}
-}
-
-export function xmlFindParentNodeId(node, id) {
-	let parentNode=xmlFindParentNode(node,id);
-	if (!parentNode)
+export function xmlMap(element, fn) {
+	if (typeof element=="string")
 		return;
 
-	return parentNode.id;
-}
-
-export function xmlNodeFindChildIndex(node, childId) {
-	for (let i=0; i<node.children.length; i++) {
-		if (node.children[i].id==childId)
-			return i;
+	if (Array.isArray(element)) {
+		element.map(node=>xmlMap(node,fn));
+		return;
 	}
 
-	return -1;
+	fn(element);
+	xmlMap(element.children,fn);
+}
+
+export function xmlFind(element, fn) {
+	if (typeof element=="string")
+		return;
+
+	if (Array.isArray(element)) {
+		for (let el of element) {
+			let found=xmlFind(el,fn);
+			if (found)
+				return found;
+		}
+
+		return;
+	}
+
+	if (fn(element))
+		return element;
+
+	return xmlFind(element.children,fn);
+}
+
+export function xmlIndex(element, fn) {
+	if (typeof element=="string")
+		return -1;
+
+	if (Array.isArray(element)) {
+		for (let i=0; i<element.length; i++) {
+			if (fn(element[i]))
+				return i;
+
+			let ci=xmlIndex(element[i],fn);
+			if (ci>=0)
+				return ci;
+		}
+
+		return -1;
+	}
+
+	return xmlIndex(element.children,fn);
+}
+
+export function xmlFragment(element, fn) {
+	if (typeof element=="string")
+		return;
+
+	if (Array.isArray(element)) {
+		for (let i=0; i<element.length; i++) {
+			if (fn(element[i]))
+				return element;
+
+			let frag=xmlFragment(element[i],fn);
+			if (frag)
+				return frag;
+		}
+
+		return;
+	}
+
+	return xmlFragment(element.children,fn);
+}
+
+export function xmlPath(element, fn) {
+	if (typeof element=="string")
+		return;
+
+	if (Array.isArray(element)) {
+		for (let el of element) {
+			let path=xmlPath(el,fn);
+			if (path)
+				return path;
+		}
+
+		return;
+	}
+
+	if (fn(element))
+		return [element];
+
+	let path=xmlPath(element.children,fn);
+	if (path)
+		return [element,...path];
+}
+
+export function xmlParent(element, fn) {
+	let path=xmlPath(element,fn);
+	if (path && path.length>1)
+		return path[path.length-2];
 }

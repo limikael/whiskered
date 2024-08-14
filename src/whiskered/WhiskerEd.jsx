@@ -1,9 +1,11 @@
 import {classStringAdd} from "../utils/js-util.js";
-import {InterjectRender} from "../utils/react-util.jsx";
+import {InterjectRender, useConstructor, useForceUpdate} from "../utils/react-util.jsx";
 import {useEventUpdate} from "../utils/react-util.jsx";
 import {txmlStringify} from "../utils/txml-stringify.js";
-import {xmlFragmentRemoveNode, xmlNodeParse, xmlAppendChild, xmlFindNode,
-		xmlNodeRemoveNode} from "../utils/xml-util.js";
+import WhiskerEdState from "./WhiskerEdState.js";
+import WhiskerEdHandlers from "./WhiskerEdHandlers.js";
+import {nodeId, nodePred} from "./whiskered-util.js";
+import {xmlFind} from "../utils/xml-util.js";
 
 function WhiskerEdStyle() {
 	return (
@@ -40,43 +42,31 @@ function WhiskerEdStyle() {
 	);
 }
 
-function WhiskerEdFragment({fragment, whiskerEdState, classes}) {
+function WhiskerEdFragment({fragment, whiskerEdState, classes, handlers}) {
 	return (<>
 		{fragment.map(c=>
 			<WhiskerEdNode 
 				node={c} 
 				whiskerEdState={whiskerEdState}
-				classes={classes}/>
+				classes={classes}
+				handlers={handlers}/>
 		)}
 	</>);
 }
 
-function WhiskerEdNode({node, whiskerEdState, classes}) {
+function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 	let Component=whiskerEdState.componentLibrary[node.tagName];
 	let props=node.attributes;
 
 	function interjectProps(props) {
-		props.ref=el=>whiskerEdState.setNodeEl(node.id,el);
+		let id=nodeId(node);
+		props.ref=el=>whiskerEdState.setNodeEl(id,el);
 		props.draggable=true;
-		props.onDragStart=ev=>whiskerEdState.handleDragStart(ev);
-		props.onDragEnd=ev=>whiskerEdState.handleDragEnd(ev);
+		props.onDragStart=handlers.handleDragStart;
+		props.onDragEnd=handlers.handleDragEnd;
 
-		if (classes[node.id])
-			props.class=classStringAdd(props.class,classes[node.id]);
-	}
-
-	let content;
-	if (Component.containerType=="richtext") {
-		content=<span dangerouslySetInnerHTML={{__html: txmlStringify(node.children)}} contenteditable={true}/>;
-	}
-
-	else {
-		content=(
-			<WhiskerEdFragment
-					fragment={node.children}
-					whiskerEdState={whiskerEdState}
-					classes={classes}/>
-		);
+		if (classes[id])
+			props.class=classStringAdd(props.class,classes[id]);
 	}
 
 	return (
@@ -84,7 +74,11 @@ function WhiskerEdNode({node, whiskerEdState, classes}) {
 				interjectComponent={Component}
 				interjectProps={interjectProps}
 				{...props}>
-			{content}
+			<WhiskerEdFragment
+					fragment={node.children}
+					whiskerEdState={whiskerEdState}
+					classes={classes}
+					handlers={handlers}/>
 		</InterjectRender>
 	);
 }
@@ -96,13 +90,13 @@ function createWhiskerEdClasses(whiskerEdState) {
 	}
 
 	if (whiskerEdState.selectedId && 
-			!whiskerEdState.getDragState())
+			!whiskerEdState.isDrag())
 		addClass(whiskerEdState.selectedId,"ed-select");
 
 	if (whiskerEdState.isValidDrag()) {
 		let fragment=whiskerEdState.value;
 		if (whiskerEdState.dropParentId) {
-			let node=xmlFindNode(whiskerEdState.getValueNode(),whiskerEdState.dropParentId);
+			let node=xmlFind(whiskerEdState.value,nodePred(whiskerEdState.dropParentId));
 			fragment=node.children;
 		}
 
@@ -117,12 +111,12 @@ function createWhiskerEdClasses(whiskerEdState) {
 			let dropClasses=directionDropClasses[whiskerEdState.dropLayoutDirection];
 
 			if (whiskerEdState.dropInsertIndex>=fragment.length) {
-				let id=fragment[fragment.length-1].id;
+				let id=nodeId(fragment[fragment.length-1]);
 				addClass(id,dropClasses[1]);
 			}
 
 			else {
-				let id=fragment[whiskerEdState.dropInsertIndex].id;
+				let id=nodeId(fragment[whiskerEdState.dropInsertIndex]);
 				addClass(id,dropClasses[0]);
 			}
 		}
@@ -135,65 +129,13 @@ function createWhiskerEdClasses(whiskerEdState) {
 	return classes;	
 }
 
-export default function WhiskerEd({whiskerEdState, class: cls}) {
-	useEventUpdate(whiskerEdState,"selectionChange");
-	useEventUpdate(whiskerEdState,"focusChange");
-	useEventUpdate(whiskerEdState,"dragChange");
-	useEventUpdate(whiskerEdState,"hoverChange");
-	useEventUpdate(whiskerEdState,"change");
+export default function WhiskerEd({value, componentLibrary, class: cls}) {
+	let whiskerEdState=useConstructor(()=>new WhiskerEdState());
+	let forceUpdate=useForceUpdate();
+	whiskerEdState.preRender({value, componentLibrary});
+	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate});
 
-	function handleMouseDown(ev) {
-		let id=whiskerEdState.getIdByEl(ev.target);
-		whiskerEdState.setSelectedId(id);
-	}
-
-	function handleMouseMove(ev) {
-		if (ev.type=="dragover")
-			ev.preventDefault();
-
-		whiskerEdState.updateHover(ev);
-	}
-
-	function handleKeyDown(ev) {
-		if (ev.code=="Delete" || ev.code=="Backspace") {
-			if (!whiskerEdState.selectedId)
-				return;
-
-			let v=whiskerEdState.value;
-			v=xmlFragmentRemoveNode(v,whiskerEdState.selectedId);
-			whiskerEdState.setValue(v);
-		}
-	}
-
-	function handleDrop(ev) {
-		//console.log("***** DROP");
-
-		ev.preventDefault();
-
-		let dropData=ev.dataTransfer.getData("whiskered");
-		if (!dropData ||
-				!whiskerEdState.isValidDrag()) {
-			whiskerEdState.clearDragState();
-			return;
-		}
-
-		let child=xmlNodeParse(dropData);
-		let valueNode=whiskerEdState.getValueNode();
-		let parentNode=valueNode;
-		if (whiskerEdState.dropParentId)
-			parentNode=xmlFindNode(valueNode,whiskerEdState.dropParentId);
-
-		parentNode.children.splice(whiskerEdState.dropInsertIndex,0,child);
-
-		if (whiskerEdState.dragId)
-			xmlNodeRemoveNode(valueNode,whiskerEdState.dragId);
-
-		whiskerEdState.setValueNode(valueNode);
-
-		whiskerEdState.clearDragState();
-	}
-
-	if (whiskerEdState.focusState)
+	if (whiskerEdState.focus)
 		cls=classStringAdd(cls,"ed-focus");
 
 	if (whiskerEdState.isValidDrag() &&
@@ -207,20 +149,21 @@ export default function WhiskerEd({whiskerEdState, class: cls}) {
 	return (
 		<div class={classStringAdd(cls,"!cursor-default !select-none")}
 				tabIndex={0}
-				onMouseDown={handleMouseDown}
-				onFocus={()=>whiskerEdState.setFocusState(true)}
-				onBlur={()=>whiskerEdState.setFocusState(false)}
-				onDragEnter={(ev)=>whiskerEdState.changeDragCount(1,ev)}
-				onDragLeave={(ev)=>whiskerEdState.changeDragCount(-1,ev)}
-				onMouseMove={handleMouseMove}
-				onDragOver={handleMouseMove}
-				onKeyDown={handleKeyDown}
-				onDrop={handleDrop}>
+				onFocus={handlers.handleFocus}
+				onBlur={handlers.handleBlur}
+				onMouseDown={handlers.handleMouseDown}
+				onKeyDown={handlers.handleKeyDown}
+				onDragEnter={handlers.handleDragEnter}
+				onDragLeave={handlers.handleDragLeave}
+				onMouseMove={handlers.handleMouseMove}
+				onDragOver={handlers.handleMouseMove}
+				onDrop={handlers.handleDrop}>
 			<WhiskerEdStyle/>
 			<WhiskerEdFragment 
 				classes={createWhiskerEdClasses(whiskerEdState)}
 				whiskerEdState={whiskerEdState}
-				fragment={whiskerEdState.value}/>
+				fragment={whiskerEdState.value}
+				handlers={handlers}/>
 		</div>
 	);
 }
