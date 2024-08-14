@@ -1,6 +1,7 @@
 import {classStringAdd} from "../utils/js-util.js";
 import {InterjectRender} from "../utils/react-util.jsx";
 import {useEventUpdate} from "../utils/react-util.jsx";
+import {txmlStringify} from "../utils/txml-stringify.js";
 import {xmlFragmentRemoveNode, xmlNodeParse, xmlAppendChild, xmlFindNode,
 		xmlNodeRemoveNode} from "../utils/xml-util.js";
 
@@ -64,15 +65,26 @@ function WhiskerEdNode({node, whiskerEdState, classes}) {
 			props.class=classStringAdd(props.class,classes[node.id]);
 	}
 
+	let content;
+	if (Component.containerType=="richtext") {
+		content=<span dangerouslySetInnerHTML={{__html: txmlStringify(node.children)}} contenteditable={true}/>;
+	}
+
+	else {
+		content=(
+			<WhiskerEdFragment
+					fragment={node.children}
+					whiskerEdState={whiskerEdState}
+					classes={classes}/>
+		);
+	}
+
 	return (
 		<InterjectRender
 				interjectComponent={Component}
 				interjectProps={interjectProps}
 				{...props}>
-			<WhiskerEdFragment
-					fragment={node.children}
-					whiskerEdState={whiskerEdState}
-					classes={classes}/>					
+			{content}
 		</InterjectRender>
 	);
 }

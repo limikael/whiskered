@@ -34,3 +34,21 @@ export function InterjectRender({interjectComponent, interjectProps, ...props}) 
 
 	return el;
 }
+
+export default function ContentEditable({class: className, value, onChange, element}) {
+	function handleInput(ev) {
+		onChange(ev.target.innerHTML);
+	}
+
+	let Element=element;
+	if (!Element)
+		element="div";
+
+	return (
+		<Element
+				onInput={handleInput}
+				class={className}
+				contenteditable={true}
+				dangerouslySetInnerHTML={{__html: value}}/>
+	);
+}

@@ -9,6 +9,9 @@ export function xmlNodeParse(text) {
 }
 
 export function xmlNodeIdfy(node) {
+	if (typeof node=="string")
+		return node;
+
 	if (!node.id)
 		node.id=crypto.randomUUID();
 

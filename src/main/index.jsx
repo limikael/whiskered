@@ -36,11 +36,21 @@ let LIBRARY={
 			</div>
 		</div>)
 	},
+
+	Text({children}) {
+		return (
+			<div class="border p-5">
+				Here is some text...
+				{children}
+			</div>
+		)
+	}
 }
 
 LIBRARY.Hello.containerType="children";
 LIBRARY.Flex.containerType="children";
 LIBRARY.Flex.layoutDirection="right";
+LIBRARY.Text.containerType="richtext";
 
 function ComponentLibraryItem({name, item}) {
 	function handleDragStart(ev) {
@@ -69,7 +79,7 @@ function ComponentLibrary({componentLibrary}) {
 export default function() {
 	let whiskerEdState=useWhiskerEdState({
 		componentLibrary: LIBRARY,
-		xml: `
+		/*xml: `
 			<Hello color="#e0d0c0">
 				<Test color="#ffc0c0"/>
 				<Test color="#c0c0ff"/>
@@ -78,6 +88,11 @@ export default function() {
 				</Hello>
 			</Hello>
 			<Hello color="#ff0000/>
+		`,*/
+		xml: `
+			<Hello color="#e0d0c0">
+				<Text>Hello <b>World</b></Text>
+			</Hello>
 		`,
 	});
 
