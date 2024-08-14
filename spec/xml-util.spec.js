@@ -22,6 +22,12 @@ describe("xml util",()=>{
 		expect(index).toEqual(1);
 	});
 
+	it("can find a node index among text",()=>{
+		let xml=parseXml('<div>hello<x v="5"/></div>');
+		let index=xmlIndex(xml,n=>n.attributes.v=="5");
+		expect(index).toEqual(1);
+	});
+
 	it("can find conaining fragment",()=>{
 		let xml=parseXml('<div></div><x/><a><el><b/><x v="5"/><b/></el></a><y/>');
 		let frag=xmlFragment(xml,n=>n.attributes.v=="5");
@@ -31,9 +37,18 @@ describe("xml util",()=>{
 		expect(index).toEqual(1);
 	});
 
+	it("can find conaining fragment among text",()=>{
+		let xml=parseXml('<div></div><x/><a><el><b/>hello<x v="5"/><b/></el></a><y/>');
+		let frag=xmlFragment(xml,n=>n.attributes.v=="5");
+		let index=xmlIndex(xml,n=>n.attributes.v=="5");
+		//console.log(frag,index);
+		expect(frag.length).toEqual(4);
+		expect(index).toEqual(2);
+	});
+
 	it("can find the path to and element",()=>{
 		//let xml=parseXml('<el><el2><x v="6"/></el2></el>');
-		let xml=parseXml('<b/><a><test/><el><x v="5"/></el></a>');
+		let xml=parseXml('<b/><a><test/><el>hello world<x v="5"/></el></a>');
 		let path=xmlPath(xml,n=>n.attributes.v=="5")
 		let pathTags=path.map(n=>n.tagName);
 		//console.log(pathTags);

@@ -14,9 +14,40 @@ export default class WhiskerEdHandlers {
 		if (id==this.whiskerEdState.selectedId)
 			return;
 
+		this.whiskerEdState.editTextMode=false;
 		this.whiskerEdState.selectedId=id;
 		this.forceUpdate();
 	}
+
+	handleDblClick=(ev)=>{
+		let id=this.whiskerEdState.getIdByEl(ev.target);
+		this.whiskerEdState.selectedId=id;
+		this.whiskerEdState.editTextMode=false;
+
+		if (id) {
+			let node=xmlFind(this.whiskerEdState.value,nodePred(id))
+			let Component=this.whiskerEdState.componentLibrary[node.tagName];
+			if (Component.containerType=="richtext")
+				this.whiskerEdState.editTextMode=true;
+		}
+
+		this.forceUpdate();
+	}
+
+	/*handleClick=(ev)=>{
+		let id=this.whiskerEdState.getIdByEl(ev.target);
+		this.whiskerEdState.selectedId=id;
+		this.whiskerEdState.editTextMode=false;
+
+		if (id) {
+			let node=xmlFind(this.whiskerEdState.value,nodePred(id))
+			let Component=this.whiskerEdState.componentLibrary[node.tagName];
+			if (Component.containerType=="richtext")
+				this.whiskerEdState.editTextMode=true;
+		}
+
+		this.forceUpdate();
+	}*/
 
 	handleFocus=(ev)=>{
 		if (this.whiskerEdState.focus)
@@ -35,6 +66,9 @@ export default class WhiskerEdHandlers {
 	}
 
 	handleKeyDown=(ev)=> {
+		if (this.whiskerEdState.editTextMode)
+			return;
+
 		if (ev.code=="Delete" || ev.code=="Backspace") {
 			if (!this.whiskerEdState.selectedId)
 				return;
@@ -143,6 +177,20 @@ export default class WhiskerEdHandlers {
 			return;
 
 		this.clearDragState();
+		this.forceUpdate();
+	}
+
+	handleTextChange=(html)=>{
+		if (!this.whiskerEdState.editTextMode)
+			return;
+
+		let editNode=xmlFind(this.whiskerEdState.value,nodePred(this.whiskerEdState.selectedId));
+		editNode.children=parseXml(html);
+		this.forceUpdate();
+	}
+
+	handleTextBlur=(ev)=>{
+		this.whiskerEdState.editTextMode=false;
 		this.forceUpdate();
 	}
 }

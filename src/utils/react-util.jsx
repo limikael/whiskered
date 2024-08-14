@@ -1,4 +1,4 @@
-import {useRef, useState, useLayoutEffect, useCallback, cloneElement} from "react";
+import {useRef, useState, useLayoutEffect, useCallback, cloneElement, useEffect} from "react";
 
 export function useConstructor(fn) {
 	let value=useRef();
@@ -42,10 +42,23 @@ export function InterjectRender({interjectComponent, interjectProps, ...props}) 
 	return el;
 }
 
-export default function ContentEditable({class: className, value, onChange, element}) {
+export function ContentEditable({class: className, initialValue, onChange, onBlur, element}) {
+	let initialValueRef=useRef(initialValue);
+	let ref=useRef();
+
 	function handleInput(ev) {
+		if (!onChange)
+			return;
+
 		onChange(ev.target.innerHTML);
 	}
+
+	useEffect(()=>{
+		ref.current.focus();
+		document.execCommand("selectAll");
+		let selection=document.getSelection();
+		selection.collapseToEnd();
+	},[]);
 
 	let Element=element;
 	if (!Element)
@@ -53,9 +66,11 @@ export default function ContentEditable({class: className, value, onChange, elem
 
 	return (
 		<Element
+				onBlur={onBlur}
 				onInput={handleInput}
 				class={className}
 				contenteditable={true}
-				dangerouslySetInnerHTML={{__html: value}}/>
+				dangerouslySetInnerHTML={{__html: initialValueRef.current}}
+				ref={ref}/>
 	);
 }

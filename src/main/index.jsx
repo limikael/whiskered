@@ -40,7 +40,6 @@ let LIBRARY={
 	Text({children}) {
 		return (
 			<div class="border p-5">
-				Here is some text...
 				{children}
 			</div>
 		)
@@ -77,7 +76,7 @@ function ComponentLibrary({componentLibrary}) {
 }
 
 export default function() {
-	let [value,setValue]=useState(()=>parseXml(`
+	/*let [value,setValue]=useState(()=>parseXml(`
 		<Hello color="#e0d0c0">
 			<Test color="#ffc0c0"/>
 			<Test color="#c0c0ff"/>
@@ -86,6 +85,17 @@ export default function() {
 			</Hello>
 		</Hello>
 		<Hello color="#ff0000/>
+	`));*/
+
+	let [value,setValue]=useState(()=>parseXml(`
+		<Hello color="#e0d0c0">
+			<Text>
+				he<b>ll</b>o world
+			</Text>
+		</Hello>
+		<Text>
+			hello world again
+		</Text>
 	`));
 
 	return (

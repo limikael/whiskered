@@ -1,6 +1,6 @@
 import {classStringAdd} from "../utils/js-util.js";
 import {InterjectRender, useConstructor, useForceUpdate} from "../utils/react-util.jsx";
-import {useEventUpdate} from "../utils/react-util.jsx";
+import {useEventUpdate, ContentEditable} from "../utils/react-util.jsx";
 import {txmlStringify} from "../utils/txml-stringify.js";
 import WhiskerEdState from "./WhiskerEdState.js";
 import WhiskerEdHandlers from "./WhiskerEdHandlers.js";
@@ -69,16 +69,41 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 			props.class=classStringAdd(props.class,classes[id]);
 	}
 
-	return (
-		<InterjectRender
-				interjectComponent={Component}
-				interjectProps={interjectProps}
-				{...props}>
+	let content;
+	if (Component.containerType=="richtext") {
+		if (whiskerEdState.selectedId==nodeId(node) &&
+				whiskerEdState.editTextMode) {
+			content=(
+				<ContentEditable
+						initialValue={txmlStringify(node.children,{pretty: false})}
+						class="outline-none cursor-text"
+						element="span"
+						onChange={handlers.handleTextChange}
+						onBlur={handlers.handleTextBlur}/>
+			);
+		}
+
+		else {
+			content=<span dangerouslySetInnerHTML={{__html: txmlStringify(node.children,{pretty: false})}}/>;
+		}
+	}
+
+	else {
+		content=(
 			<WhiskerEdFragment
 					fragment={node.children}
 					whiskerEdState={whiskerEdState}
 					classes={classes}
 					handlers={handlers}/>
+		);
+	}
+
+	return (
+		<InterjectRender
+				interjectComponent={Component}
+				interjectProps={interjectProps}
+				{...props}>
+			{content}
 		</InterjectRender>
 	);
 }
@@ -99,6 +124,8 @@ function createWhiskerEdClasses(whiskerEdState) {
 			let node=xmlFind(whiskerEdState.value,nodePred(whiskerEdState.dropParentId));
 			fragment=node.children;
 		}
+
+		//console.log(fragment);
 
 		if (fragment.length>0) {
 			let directionDropClasses={
@@ -146,8 +173,11 @@ export default function WhiskerEd({value, componentLibrary, class: cls}) {
 	else
 		cls=classStringAdd(cls,"outline-none");
 
+	//console.log("render, text: "+whiskerEdState.editTextMode);
+	//onClick={handlers.handleClick}
+
 	return (
-		<div class={classStringAdd(cls,"!cursor-default !select-none")}
+		<div class={classStringAdd(cls,"cursor-default !select-none")}
 				tabIndex={0}
 				onFocus={handlers.handleFocus}
 				onBlur={handlers.handleBlur}
@@ -157,7 +187,8 @@ export default function WhiskerEd({value, componentLibrary, class: cls}) {
 				onDragLeave={handlers.handleDragLeave}
 				onMouseMove={handlers.handleMouseMove}
 				onDragOver={handlers.handleMouseMove}
-				onDrop={handlers.handleDrop}>
+				onDrop={handlers.handleDrop}
+				onDblClick={handlers.handleDblClick}>
 			<WhiskerEdStyle/>
 			<WhiskerEdFragment 
 				classes={createWhiskerEdClasses(whiskerEdState)}

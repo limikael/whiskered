@@ -1,7 +1,7 @@
 import {parse as parseXml} from "txml/txml";
 
 export function xmlMap(element, fn) {
-	if (typeof element=="string")
+	if (typeof element=="string" || !element)
 		return;
 
 	if (Array.isArray(element)) {
@@ -14,7 +14,7 @@ export function xmlMap(element, fn) {
 }
 
 export function xmlFind(element, fn) {
-	if (typeof element=="string")
+	if (typeof element=="string" || !element)
 		return;
 
 	if (Array.isArray(element)) {
@@ -34,12 +34,14 @@ export function xmlFind(element, fn) {
 }
 
 export function xmlIndex(element, fn) {
-	if (typeof element=="string")
+	if (typeof element=="string" || !element)
 		return -1;
 
 	if (Array.isArray(element)) {
 		for (let i=0; i<element.length; i++) {
-			if (fn(element[i]))
+			if (element[i] && 
+					typeof element[i]!="string" && 
+					fn(element[i]))
 				return i;
 
 			let ci=xmlIndex(element[i],fn);
@@ -54,12 +56,14 @@ export function xmlIndex(element, fn) {
 }
 
 export function xmlFragment(element, fn) {
-	if (typeof element=="string")
+	if (typeof element=="string" || !element)
 		return;
 
 	if (Array.isArray(element)) {
 		for (let i=0; i<element.length; i++) {
-			if (fn(element[i]))
+			if (element[i] &&
+					typeof element[i]!="string" &&
+					fn(element[i]))
 				return element;
 
 			let frag=xmlFragment(element[i],fn);
@@ -74,7 +78,7 @@ export function xmlFragment(element, fn) {
 }
 
 export function xmlPath(element, fn) {
-	if (typeof element=="string")
+	if (typeof element=="string" || !element)
 		return;
 
 	if (Array.isArray(element)) {

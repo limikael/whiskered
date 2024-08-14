@@ -68,12 +68,14 @@ export default class WhiskerEdState {
 
 		for (let i=0; i<fragment.length; i++) {
 			let c=fragment[i];
-			let mid=elMidpoint(this.elById.get(nodeId(c)));
-			let dist=pDist(mouseLocation,mid);
-			if (closestDist===undefined ||
-					dist<closestDist) {
-				closestIndex=i;
-				closestDist=dist;
+			if (typeof c!="string") {
+				let mid=elMidpoint(this.elById.get(nodeId(c)));
+				let dist=pDist(mouseLocation,mid);
+				if (closestDist===undefined ||
+						dist<closestDist) {
+					closestIndex=i;
+					closestDist=dist;
+				}
 			}
 		}
 
@@ -133,6 +135,7 @@ export default class WhiskerEdState {
 			}
 		}
 
+		// Set layout direction.
 		let dropLayoutDirection="down";
 		let dropInsertIndex;
 		if (dropParentId) {
