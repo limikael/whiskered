@@ -79,7 +79,7 @@ function ComponentLibrary({componentLibrary}) {
 export default function() {
 	let whiskerEdState=useWhiskerEdState({
 		componentLibrary: LIBRARY,
-		/*xml: `
+		xml: `
 			<Hello color="#e0d0c0">
 				<Test color="#ffc0c0"/>
 				<Test color="#c0c0ff"/>
@@ -88,12 +88,12 @@ export default function() {
 				</Hello>
 			</Hello>
 			<Hello color="#ff0000/>
-		`,*/
-		xml: `
+		`,
+		/*xml: `
 			<Hello color="#e0d0c0">
 				<Text>Hello <b>World</b></Text>
 			</Hello>
-		`,
+		`,*/
 	});
 
 	return (

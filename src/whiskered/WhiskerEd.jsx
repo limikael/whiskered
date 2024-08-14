@@ -65,26 +65,15 @@ function WhiskerEdNode({node, whiskerEdState, classes}) {
 			props.class=classStringAdd(props.class,classes[node.id]);
 	}
 
-	let content;
-	if (Component.containerType=="richtext") {
-		content=<span dangerouslySetInnerHTML={{__html: txmlStringify(node.children)}} contenteditable={true}/>;
-	}
-
-	else {
-		content=(
-			<WhiskerEdFragment
-					fragment={node.children}
-					whiskerEdState={whiskerEdState}
-					classes={classes}/>
-		);
-	}
-
 	return (
 		<InterjectRender
 				interjectComponent={Component}
 				interjectProps={interjectProps}
 				{...props}>
-			{content}
+			<WhiskerEdFragment
+					fragment={node.children}
+					whiskerEdState={whiskerEdState}
+					classes={classes}/>
 		</InterjectRender>
 	);
 }
