@@ -89,10 +89,23 @@ export default function() {
 
 	let [value,setValue]=useState(()=>parseXml(`
 		<Hello color="#e0d0c0">
+			This text shouldn't be here but it is kind of long...
 			<Text>
 				he<b>ll</b>o world
+				<Bla/><Hello>test</Hello>
 			</Text>
 		</Hello>
+		<Test>
+			Shoudln't be here
+			<Hello>
+			</Hello>
+		</Test>
+		<Undef>
+			Hello text
+			<Text>
+				hello world again
+			</Text>
+		</Undef>
 		<Text>
 			hello world again
 		</Text>

@@ -5,19 +5,21 @@
   "scripts": {
     "start": "katnip dev",
     "dev": "katnip dev",
-    "test": "jasmine",
-    "postinstall": "katnip init"
+    "test": "jasmine"
   },
   "type": "module",
   "version": "1.0.0",
   "dependencies": {
-    "jasmine": "^5.2.0",
-    "katnip-isoq": "^3.0.41",
-    "katnip-tailwind": "^3.0.34",
-    "katnip-watch": "^3.0.21",
     "txml": "^5.1.1"
   },
+  "devDependencies": {
+    "jasmine": "^5.2.0",
+    "katnip": "^3.0.29",
+    "katnip-isoq": "^3.0.46",
+    "katnip-tailwind": "^3.0.34",
+    "katnip-watch": "^3.0.21"
+  },
   "exports": {
-    "./isomain": "./src/main/index.jsx"
+    "./isomain": "./src/main/index-whiskered.jsx"
   }
 }

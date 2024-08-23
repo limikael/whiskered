@@ -1,4 +1,4 @@
-import {classStringAdd} from "../utils/js-util.js";
+import {classStringAdd, isStringy} from "../utils/js-util.js";
 import {InterjectRender, useConstructor, useForceUpdate} from "../utils/react-util.jsx";
 import {useEventUpdate, ContentEditable} from "../utils/react-util.jsx";
 import {txmlStringify} from "../utils/txml-stringify.js";
@@ -70,7 +70,7 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 	}
 
 	let content;
-	if (Component.containerType=="richtext") {
+	if (Component && Component.containerType=="richtext") {
 		if (whiskerEdState.selectedId==nodeId(node) &&
 				whiskerEdState.editTextMode) {
 			content=(
@@ -88,6 +88,20 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 		}
 	}
 
+	else if (isStringy(node)) {
+		let id=nodeId(node);
+
+		return (
+			<span ref={el=>whiskerEdState.setNodeEl(id,el)}
+					class={classes[id]}
+					draggable={true}
+					onDragStart={handlers.handleDragStart}
+					onDragEnd={handlers.handleDragEnd}>
+				{node}
+			</span>
+		);
+	}
+
 	else {
 		content=(
 			<WhiskerEdFragment
@@ -97,6 +111,9 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 					handlers={handlers}/>
 		);
 	}
+
+	if (!Component)
+		Component=({children})=><div>Undefined: {node.tagName} {children}</div>
 
 	return (
 		<InterjectRender
@@ -158,8 +175,9 @@ function createWhiskerEdClasses(whiskerEdState) {
 
 export default function WhiskerEd({value, componentLibrary, class: cls}) {
 	let whiskerEdState=useConstructor(()=>new WhiskerEdState());
-	let forceUpdate=useForceUpdate();
 	whiskerEdState.preRender({value, componentLibrary});
+
+	let forceUpdate=useForceUpdate();
 	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate});
 
 	if (whiskerEdState.focus)
@@ -173,6 +191,7 @@ export default function WhiskerEd({value, componentLibrary, class: cls}) {
 	else
 		cls=classStringAdd(cls,"outline-none");
 
+	//console.log(whiskerEdState.selectedId);
 	//console.log("render, text: "+whiskerEdState.editTextMode);
 	//onClick={handlers.handleClick}
 

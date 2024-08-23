@@ -68,14 +68,12 @@ export default class WhiskerEdState {
 
 		for (let i=0; i<fragment.length; i++) {
 			let c=fragment[i];
-			if (typeof c!="string") {
-				let mid=elMidpoint(this.elById.get(nodeId(c)));
-				let dist=pDist(mouseLocation,mid);
-				if (closestDist===undefined ||
-						dist<closestDist) {
-					closestIndex=i;
-					closestDist=dist;
-				}
+			let mid=elMidpoint(this.elById.get(nodeId(c)));
+			let dist=pDist(mouseLocation,mid);
+			if (closestDist===undefined ||
+					dist<closestDist) {
+				closestIndex=i;
+				closestDist=dist;
 			}
 		}
 
@@ -102,6 +100,14 @@ export default class WhiskerEdState {
 		this.dropLayoutDirection=dropLayoutDirection;
 	}
 
+	getNodeComponent(node) {
+		let Comp;
+		if (node && node.tagName)
+			Comp=this.componentLibrary[node.tagName];
+
+		return Comp;
+	}
+
 	updateHover(el, mouseLocation) {
 		let hoverId=this.getIdByEl(el);
 		let dropParentId=hoverId;
@@ -115,13 +121,12 @@ export default class WhiskerEdState {
 
 		// Use parent if can't have children.
 		if (dropParentId) {
-			let node=xmlFind(this.value,nodePred(dropParentId));
-			let Comp=this.componentLibrary[node.tagName];
-			if (Comp.containerType!="children")
+			let Comp=this.getNodeComponent(xmlFind(this.value,nodePred(dropParentId)));
+			if (!Comp || Comp.containerType!="children")
 				dropParentId=nodeId(xmlParent(this.value,nodePred(dropParentId)));
 		}
 
-		// Dropping on self or parent is illegal.
+		// Dropping on self or child is illegal.
 		if (dropParentId) {
 			let path=xmlPath(this.value,nodePred(dropParentId));
 			let pathIds=path.map(n=>nodeId(n));
@@ -135,12 +140,18 @@ export default class WhiskerEdState {
 			}
 		}
 
-		// Set layout direction.
+		// Set layout direction and index.
 		let dropLayoutDirection="down";
 		let dropInsertIndex;
 		if (dropParentId) {
 			let node=xmlFind(this.value,nodePred(dropParentId));
-			let Comp=this.componentLibrary[node.tagName];
+			let Comp=this.getNodeComponent(node);
+			if (!Comp)
+				return this.setHoverState({
+					hoverId: hoverId,
+					dropParentId: "illegal",
+				});
+
 			if (Comp.layoutDirection)
 				dropLayoutDirection=Comp.layoutDirection;
 

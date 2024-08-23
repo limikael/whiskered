@@ -6,6 +6,12 @@ export function arrayOnlyUnique(a) {
 	return a.filter(onlyUnique);
 }
 
+export function arrayMove(array, initialIndex, finalIndex, num=1) {
+	array.splice(finalIndex,0,...array.splice(initialIndex,num));
+
+	return array;
+}
+
 export function arrayRemove(array, item) {
 	let index=array.indexOf(item);
 	if (index>=0)
@@ -32,4 +38,8 @@ export function classStringAdd(classString, add) {
 export function classStringRemove(classString, remove) {
 	let current=classStringToArray(classString);
 	return arrayRemove(current,remove);
+}
+
+export function isStringy(s) {
+	return ((typeof s=="string") || (s instanceof String));
 }

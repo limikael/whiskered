@@ -1,3 +1,6 @@
+import {parse as parseXml} from "txml/txml";
+import {isStringy} from "./js-util.js";
+
 function escapeXml(unsafe) {
     return unsafe.replace(/[<>&'"]/g, function (c) {
         switch (c) {
@@ -38,15 +41,18 @@ function txmlStringifyNode(doc, options) {
 
 	let rep=(s,n)=>Array(n).fill(s).join("");
 
-	if (typeof doc=="string") {
+	if ((typeof doc=="string") || 
+			(doc instanceof String)) {
 		if (!options.pretty)
-			return doc;
+			return doc.toString();
 
 		if (!doc.trim())
 			return "";
 
 		return rep("\t",options.indent)+escapeXml(doc)+"\n";
 	}
+
+	//console.log("here...",doc);
 
 	let attr="";
 	for (let k in doc.attributes) {
@@ -89,4 +95,36 @@ export function txmlStringify(element, options={}) {
 
 	else
 		return txmlStringifyNode(element, options);
+}
+
+function fixupTxmlElement(el) {
+	if (isStringy(el)) {
+		return (el
+			.replaceAll("&lt;","<")
+			.replaceAll("&gt;",">")
+			.replaceAll("&amp;","&")
+			.replaceAll("&apos;","'")
+			.replaceAll("&quot;","\"")
+			.replaceAll("&#xA;","\n")
+			.replaceAll("&#xD;","\r")
+			.replaceAll("&#x9","\t")
+		);
+	}
+
+	if (Array.isArray(el))
+		return el.map(e=>fixupTxmlElement(e));
+
+	let fixedAttributes={};
+	for (let k in el.attributes)
+		fixedAttributes[k]=fixupTxmlElement(el.attributes[k]);
+
+	return ({
+		tagName: el.tagName,
+		attributes: fixedAttributes,
+		children: fixupTxmlElement(el.children)
+	});
+}
+
+export function txmlParse(s) {
+	return fixupTxmlElement(parseXml(s));
 }

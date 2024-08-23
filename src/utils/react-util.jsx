@@ -35,6 +35,9 @@ export function useForceUpdate() {
 }
 
 export function InterjectRender({interjectComponent, interjectProps, ...props}) {
+	if (!interjectComponent)
+		return;
+
 	let el=interjectComponent(props);
 	interjectProps(el.props);
 	el=cloneElement(el,el.props);

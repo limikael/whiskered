@@ -1,3 +1,12 @@
+export function elLocalCoords(el, c) {
+	let rect=el.getBoundingClientRect();
+
+	return {
+		x: c.x-rect.x,
+		y: c.y-rect.y
+	}
+}
+
 export function elMidpoint(el) {
 	let rect=el.getBoundingClientRect();
 	return {
@@ -19,6 +28,13 @@ export function elIsOnEdge(el, p, edgeSize) {
 		p.y<rect.top+vEdgeSize ||
 		p.y>rect.bottom-vEdgeSize
 	);
+}
+
+export function elOnLowerHalf(el, p) {
+	let mid=elMidpoint(el);
+	let v=pSub(p,mid);
+	let dot=pDot({x:0, y:1},v);
+	return (dot>0);
 }
 
 export function pDist(a, b) {
