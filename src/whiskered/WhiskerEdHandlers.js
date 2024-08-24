@@ -108,7 +108,7 @@ export default class WhiskerEdHandlers {
 			hoverId: this.whiskerEdState.hoverId,
 			dropParentId: this.whiskerEdState.dropParentId,
 			dropInsertIndex: this.whiskerEdState.dropInsertIndex,
-			dropLayoutDirection: this.whiskerEdState.dropLayoutDirection
+//			dropLayoutDirection: this.whiskerEdState.dropLayoutDirection
 		};
 
 		let mousePosition={x: ev.clientX, y: ev.clientY};
@@ -116,8 +116,8 @@ export default class WhiskerEdHandlers {
 
 		if (prev.hoverId!==this.whiskerEdState.hoverId ||
 				prev.dropParentId!==this.whiskerEdState.dropParentId ||
-				prev.dropInsertIndex!==this.whiskerEdState.dropInsertIndex ||
-				prev.dropLayoutDirection!==this.whiskerEdState.dropLayoutDirection)
+				prev.dropInsertIndex!==this.whiskerEdState.dropInsertIndex)// ||
+//				prev.dropLayoutDirection!==this.whiskerEdState.dropLayoutDirection)
 			this.forceUpdate();
 	}
 

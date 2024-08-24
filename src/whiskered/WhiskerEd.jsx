@@ -152,7 +152,7 @@ function createWhiskerEdClasses(whiskerEdState) {
 				"left": ["ed-drag-right","ed-drag-left"],
 			}
 
-			let dropClasses=directionDropClasses[whiskerEdState.dropLayoutDirection];
+			let dropClasses=directionDropClasses[whiskerEdState.getDropLayoutDirection()];
 
 			if (whiskerEdState.dropInsertIndex>=fragment.length) {
 				let id=nodeId(fragment[fragment.length-1]);

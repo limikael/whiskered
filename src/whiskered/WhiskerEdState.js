@@ -93,11 +93,11 @@ export default class WhiskerEdState {
 		return insertIndex;
 	}
 
-	setHoverState({hoverId, dropParentId, dropInsertIndex, dropLayoutDirection}) {
+	setHoverState({hoverId, dropParentId, dropInsertIndex/*, dropLayoutDirection*/}) {
 		this.hoverId=hoverId;
 		this.dropParentId=dropParentId;
 		this.dropInsertIndex=dropInsertIndex;
-		this.dropLayoutDirection=dropLayoutDirection;
+		//this.dropLayoutDirection=dropLayoutDirection;
 	}
 
 	getNodeComponent(node) {
@@ -106,6 +106,18 @@ export default class WhiskerEdState {
 			Comp=this.componentLibrary[node.tagName];
 
 		return Comp;
+	}
+
+	getDropLayoutDirection() {
+		if (!this.dropParentId)
+			return "down";
+
+		let node=xmlFind(this.value,nodePred(this.dropParentId));
+		let Comp=this.getNodeComponent(node);
+		if (Comp && Comp.layoutDirection)
+			return Comp.layoutDirection;
+
+		return "down";
 	}
 
 	updateHover(el, mouseLocation) {
@@ -187,7 +199,7 @@ export default class WhiskerEdState {
 			hoverId: hoverId,
 			dropParentId: dropParentId,
 			dropInsertIndex: dropInsertIndex,
-			dropLayoutDirection: dropLayoutDirection
+			//dropLayoutDirection: dropLayoutDirection
 		});
 	}
 }
