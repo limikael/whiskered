@@ -20,6 +20,6 @@
     "katnip-watch": "^3.0.21"
   },
   "exports": {
-    "./isomain": "./src/main/index-whiskered.jsx"
+    "./isomain": "./src/main/index-doctree.jsx"
   }
 }

@@ -104,11 +104,17 @@ export function xmlMove(root, fn, newFragment, newIndex) {
 	let oldFragment=xmlFragment(root,fn);
 	let oldIndex=xmlIndex(root,fn);
 
-	if (oldFragment==newFragment) {
+	/*if (oldFragment==newFragment) {
 		arrayMove(oldFragment,oldIndex,newIndex);
 		return;
-	}
+	}*/
 
-	newFragment.splice(newIndex,0,oldFragment[oldIndex]);
+	let val=oldFragment[oldIndex];
 	oldFragment.splice(oldIndex,1);
+
+	if (oldFragment==newFragment &&
+			oldIndex<newIndex)
+		newIndex--;
+
+	newFragment.splice(newIndex,0,val);//oldFragment[oldIndex]);
 }
