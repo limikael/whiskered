@@ -1,5 +1,7 @@
-import {xmlMap, xmlFind, xmlIndex, xmlFragment, xmlPath} from "../src/utils/xml-util.js";
+import {xmlMap, xmlFind, xmlIndex, xmlFragment, xmlPath, xmlMove} from "../src/utils/xml-util.js";
 import {parse as parseXml} from "txml/txml";
+import {txmlStringify} from "../src/utils/txml-stringify.js";
+import {isStringy} from "../src/utils/js-util.js";
 
 describe("xml util",()=>{
 	it("can map nodes",()=>{
@@ -24,7 +26,7 @@ describe("xml util",()=>{
 
 	it("can find a node index among text",()=>{
 		let xml=parseXml('<div>hello<x v="5"/></div>');
-		let index=xmlIndex(xml,n=>n.attributes.v=="5");
+		let index=xmlIndex(xml,n=>!isStringy(n) && n.attributes.v=="5");
 		expect(index).toEqual(1);
 	});
 
@@ -39,8 +41,8 @@ describe("xml util",()=>{
 
 	it("can find conaining fragment among text",()=>{
 		let xml=parseXml('<div></div><x/><a><el><b/>hello<x v="5"/><b/></el></a><y/>');
-		let frag=xmlFragment(xml,n=>n.attributes.v=="5");
-		let index=xmlIndex(xml,n=>n.attributes.v=="5");
+		let frag=xmlFragment(xml,n=>!isStringy(n) && n.attributes.v=="5");
+		let index=xmlIndex(xml,n=>!isStringy(n) && n.attributes.v=="5");
 		//console.log(frag,index);
 		expect(frag.length).toEqual(4);
 		expect(index).toEqual(2);
@@ -53,5 +55,24 @@ describe("xml util",()=>{
 		let pathTags=path.map(n=>n.tagName);
 		//console.log(pathTags);
 		expect(pathTags).toEqual(["a","el","x"]);
+	});
+
+	it("can move a node to same parent",()=>{
+		let xml=parseXml('<div><a/><b/><c/><d/><e/></div>');
+		let parentFragment=xmlFind(xml,n=>n.tagName=="div").children;
+		xmlMove(xml,n=>n.tagName=="c",parentFragment,4);
+
+		let res=txmlStringify(xml,{pretty: false});
+		//console.log(res);
+		expect(res).toEqual("<div><a/><b/><d/><c/><e/></div>");
+	});
+
+	it("can move a node to a different parent",()=>{
+		let xml=parseXml('<div><a/><b/><c/><d/><e/></div><other/>');
+		let parentFragment=xmlFind(xml,n=>n.tagName=="div").children;
+		xmlMove(xml,n=>n.tagName=="c",xml,2);
+
+		let res=txmlStringify(xml,{pretty: false});
+		expect(res).toEqual("<div><a/><b/><d/><e/></div><other/><c/>");
 	});
 });

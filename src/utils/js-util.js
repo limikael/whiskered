@@ -1,4 +1,4 @@
-export function arrayOnlyUnique(a) {
+export function arrayUnique(a) {
 	function onlyUnique(value, index, array) {
 		return array.indexOf(value) === index;
 	}
@@ -7,6 +7,9 @@ export function arrayOnlyUnique(a) {
 }
 
 export function arrayMove(array, initialIndex, finalIndex, num=1) {
+	if (finalIndex>initialIndex)
+		finalIndex--;
+
 	array.splice(finalIndex,0,...array.splice(initialIndex,num));
 
 	return array;
@@ -24,13 +27,13 @@ export function classStringToArray(classString) {
 	if (!classString)
 		classString="";
 
-	return arrayOnlyUnique(classString.split(/ +/).filter(s=>s));
+	return arrayUnique(classString.split(/ +/).filter(s=>s));
 }
 
 export function classStringAdd(classString, add) {
 	let current=classStringToArray(classString);
 	current.push(add);
-	current=arrayOnlyUnique(current);
+	current=arrayUnique(current);
 
 	return current.join(" ");
 }

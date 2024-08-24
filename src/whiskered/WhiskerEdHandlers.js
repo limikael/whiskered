@@ -1,5 +1,5 @@
 import {nodePred, nodeClean, nodeInit, nodeId} from "./whiskered-util.js";
-import {xmlIndex, xmlFragment, xmlFind} from "../utils/xml-util.js";
+import {xmlIndex, xmlFragment, xmlFind, xmlMove} from "../utils/xml-util.js";
 import {txmlStringify, txmlParse} from "../utils/txml-stringify.js";
 import {isStringy} from "../utils/js-util.js";
 
@@ -124,45 +124,32 @@ export default class WhiskerEdHandlers {
 	handleDrop=(ev)=>{
 		ev.preventDefault();
 
-		let dropData=ev.dataTransfer.getData("whiskered");
-		if (!dropData ||
-				!this.whiskerEdState.isValidDrag()) {
-			this.whiskerEdState.clearDrag();
-			this.forceUpdate();
-			return;
-		}
+		if (this.whiskerEdState.isValidDrag()) {
+			if (this.whiskerEdState.dragId) {
+				let doc=this.whiskerEdState.value;
+				let fragment=doc;
+				if (this.whiskerEdState.dropParentId)
+					fragment=xmlFind(fragment,nodePred(this.whiskerEdState.dropParentId)).children;
 
-		let oldDragId;
-		if (this.whiskerEdState.dragId) {
-			let oldDragFragment=xmlFragment(this.whiskerEdState.value,nodePred(this.whiskerEdState.dragId));
-			let oldDragIndex=xmlIndex(this.whiskerEdState.value,nodePred(this.whiskerEdState.dragId));
-			nodeClean(oldDragFragment[oldDragIndex]);
-			nodeInit(oldDragFragment[oldDragIndex]);
-			if (isStringy(oldDragFragment[oldDragIndex]))
-				oldDragFragment[oldDragIndex]+="#REMOVE#";
+				let di=this.whiskerEdState.dropInsertIndex;
+				xmlMove(doc,nodePred(this.whiskerEdState.dragId),fragment,di);
+			}
 
-			oldDragId=nodeId(oldDragFragment[oldDragIndex]);
-		}
+			else if (ev.dataTransfer.getData("whiskered")) {
+				let dropData=ev.dataTransfer.getData("whiskered");
+				let dpi=this.whiskerEdState.dropParentId;
+				let fragment=this.whiskerEdState.value;
+				if (dpi)
+					fragment=xmlFind(fragment,nodePred(dpi)).children;
 
-		let fragment=this.whiskerEdState.value;
-		if (this.whiskerEdState.dropParentId) {
-			let p=nodePred(this.whiskerEdState.dropParentId);
-			fragment=xmlFind(fragment,p).children;
-		}
-
-		let childNode=txmlParse(dropData)[0];
-		//console.log(childNode);
-		fragment.splice(this.whiskerEdState.dropInsertIndex,0,childNode);
-
-		if (oldDragId) {
-			let v=this.whiskerEdState.value;
-			let fragment=xmlFragment(v,nodePred(oldDragId));
-			let index=xmlIndex(v,nodePred(oldDragId));
-			fragment.splice(index,1);
+				let childNode=txmlParse(dropData)[0];
+				fragment.splice(this.whiskerEdState.dropInsertIndex,0,childNode);
+			}
 		}
 
 		this.whiskerEdState.clearDrag();
 		this.forceUpdate();
+		return;
 	}
 
 	handleDragStart=(ev)=>{
@@ -170,13 +157,6 @@ export default class WhiskerEdHandlers {
 			return;
 
 		this.whiskerEdState.dragId=this.whiskerEdState.getIdByEl(ev.target);
-
-		//console.log("drag id: "+this.whiskerEdState.dragId);
-		let dragNode=xmlFind(this.whiskerEdState.value,nodePred(this.whiskerEdState.dragId));
-		//console.log("start drag: ",dragNode);
-		let xml=txmlStringify(dragNode);
-
-		ev.dataTransfer.setData("whiskered",xml);
 		this.forceUpdate();
 	}
 

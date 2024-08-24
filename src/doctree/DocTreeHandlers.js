@@ -1,5 +1,5 @@
 import {arrayRemove} from "../utils/js-util.js";
-import {xmlFind, xmlFragment, xmlIndex} from "../utils/xml-util.js";
+import {xmlFind, xmlFragment, xmlIndex, xmlMove} from "../utils/xml-util.js";
 import {nodePred, nodeId, nodeClean, nodeInit} from "../whiskered/whiskered-util.js";
 import {parse as parseXml} from "txml/txml";
 import {txmlStringify} from "../utils/txml-stringify.js";
@@ -32,9 +32,7 @@ export default class DocTreeHandlers {
 		if (this.docTreeState.dragId)
 			return;
 
-		this.docTreeState.dragId=id; //this.docTreeState.getIdByEl(ev.target);
-
-		//console.log("drag start, dragid: "+this.docTreeState.dragId);
+		this.docTreeState.dragId=id;
 	}
 
 	handleDrop=(ev)=>{
@@ -47,28 +45,15 @@ export default class DocTreeHandlers {
 			return;
 		}
 
-		let dragNode=xmlFind(this.docTreeState.value,nodePred(this.docTreeState.dragId));
-		let oldDragId=nodeId(dragNode);
-		dragNode=parseXml(txmlStringify(dragNode))[0];
-		nodeClean(dragNode);
-		nodeInit(dragNode);
+		let doc=this.docTreeState.value;
+		let fragment=doc;
+		if (this.docTreeState.dropParentId)
+			fragment=xmlFind(fragment,nodePred(this.docTreeState.dropParentId)).children;
 
-		let fragment=this.docTreeState.value;
-		if (this.docTreeState.dropParentId) {
-			let p=nodePred(this.docTreeState.dropParentId);
-			fragment=xmlFind(fragment,p).children;
-		}
+		//console.log(this.docTreeState.dropInsertIndex);
 
-		let insertIndex=this.docTreeState.dropInsertIndex;
-		if (insertIndex===undefined)
-			insertIndex=fragment.length;
-
-		fragment.splice(insertIndex,0,dragNode);
-
-		let oldFragment=xmlFragment(this.docTreeState.value,nodePred(oldDragId));
-		let oldIndex=xmlIndex(this.docTreeState.value,nodePred(oldDragId));
-		oldFragment.splice(oldIndex,1);
-
+		let di=this.docTreeState.dropInsertIndex;
+		xmlMove(doc,nodePred(this.docTreeState.dragId),fragment,di);
 		this.docTreeState.clearDrag();
 		this.forceUpdate();
 	}

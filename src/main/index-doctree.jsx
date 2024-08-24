@@ -73,9 +73,10 @@ COMPONENT_LIBRARY.Child=()=>{};
 export default function() {
 	let [value,setValue]=useState(()=>parseXml(`
 		<Hello color="#e0d0c0">
-			<Text/>
+			<Undef/>
 			<Hello>
 				<Child/>
+				some text
 				<Text/>
 				<Child/>
 				<Text/>

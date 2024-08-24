@@ -37,6 +37,14 @@ export default class DocTreeState {
 		this.componentLibrary=componentLibrary;
 	}
 
+	getNodeComponent(node) {
+		let Comp;
+		if (node && node.tagName)
+			Comp=this.componentLibrary[node.tagName];
+
+		return Comp;
+	}
+
 	changeDragCount(v) {
 		this.dragCount+=v;
 		if (this.dragCount<0)
@@ -118,8 +126,8 @@ export default class DocTreeState {
 		// Use parent if can't have children.
 		if (dropParentId) {
 			let node=xmlFind(this.value,nodePred(dropParentId));
-			let Comp=this.componentLibrary[node.tagName];
-			if (Comp.containerType!="children")
+			let Comp=this.getNodeComponent(node);
+			if (!Comp || Comp.containerType!="children")
 				dropParentId=nodeId(xmlParent(this.value,nodePred(dropParentId)));
 		}
 

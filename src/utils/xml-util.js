@@ -1,4 +1,5 @@
 import {parse as parseXml} from "txml/txml";
+import {arrayMove} from "./js-util.js";
 
 export function xmlMap(element, fn) {
 	if (element===undefined) return;
@@ -91,4 +92,23 @@ export function xmlParent(element, fn) {
 	let path=xmlPath(element,fn);
 	if (path && path.length>1)
 		return path[path.length-2];
+}
+
+export function xmlMove(root, fn, newFragment, newIndex) {
+	if (newIndex===undefined)
+		newIndex=newFragment.length;
+
+	if (!Array.isArray(newFragment))
+		throw new Error("expected array");
+
+	let oldFragment=xmlFragment(root,fn);
+	let oldIndex=xmlIndex(root,fn);
+
+	if (oldFragment==newFragment) {
+		arrayMove(oldFragment,oldIndex,newIndex);
+		return;
+	}
+
+	newFragment.splice(newIndex,0,oldFragment[oldIndex]);
+	oldFragment.splice(oldIndex,1);
 }
