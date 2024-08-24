@@ -71,7 +71,7 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 
 	let content;
 	if (Component && Component.containerType=="richtext") {
-		if (whiskerEdState.selectedId==nodeId(node) &&
+		if (whiskerEdState.selection.selectedId==nodeId(node) &&
 				whiskerEdState.editTextMode) {
 			content=(
 				<ContentEditable
@@ -131,9 +131,9 @@ function createWhiskerEdClasses(whiskerEdState) {
 		classes[id]=classStringAdd(classes[id],cls);
 	}
 
-	if (whiskerEdState.selectedId && 
+	if (whiskerEdState.selection.selectedId && 
 			!whiskerEdState.isDrag())
-		addClass(whiskerEdState.selectedId,"ed-select");
+		addClass(whiskerEdState.selection.selectedId,"ed-select");
 
 	if (whiskerEdState.isValidDrag()) {
 		let fragment=whiskerEdState.value;
@@ -173,12 +173,12 @@ function createWhiskerEdClasses(whiskerEdState) {
 	return classes;	
 }
 
-export default function WhiskerEd({value, componentLibrary, class: cls}) {
+export default function WhiskerEd({value, onChange, selection, componentLibrary, class: cls}) {
 	let whiskerEdState=useConstructor(()=>new WhiskerEdState());
-	whiskerEdState.preRender({value, componentLibrary});
+	whiskerEdState.preRender({value, componentLibrary, selection});
 
 	let forceUpdate=useForceUpdate();
-	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate});
+	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate, onChange});
 
 	if (whiskerEdState.focus)
 		cls=classStringAdd(cls,"ed-focus");
@@ -191,7 +191,7 @@ export default function WhiskerEd({value, componentLibrary, class: cls}) {
 	else
 		cls=classStringAdd(cls,"outline-none");
 
-	//console.log(whiskerEdState.selectedId);
+	//console.log(whiskerEdState.selection.selectedId);
 	//console.log("render, text: "+whiskerEdState.editTextMode);
 	//onClick={handlers.handleClick}
 

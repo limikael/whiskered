@@ -4,24 +4,31 @@ import {txmlStringify, txmlParse} from "../utils/txml-stringify.js";
 import {isStringy} from "../utils/js-util.js";
 
 export default class WhiskerEdHandlers {
-	constructor({whiskerEdState, forceUpdate}) {
+	constructor({whiskerEdState, forceUpdate, onChange}) {
 		this.whiskerEdState=whiskerEdState;
 		this.forceUpdate=forceUpdate;
+		this.onChange=onChange;
+	}
+
+	notifyValueChange() {
+		this.forceUpdate();
+		if (this.onChange)
+			this.onChange([...this.whiskerEdState.value]);
 	}
 
 	handleMouseDown=(ev)=>{
 		let id=this.whiskerEdState.getIdByEl(ev.target);
-		if (id==this.whiskerEdState.selectedId)
+		if (id==this.whiskerEdState.selection.selectedId)
 			return;
 
 		this.whiskerEdState.editTextMode=false;
-		this.whiskerEdState.selectedId=id;
+		this.whiskerEdState.selection.selectedId=id;
 		this.forceUpdate();
 	}
 
 	handleDblClick=(ev)=>{
 		let id=this.whiskerEdState.getIdByEl(ev.target);
-		this.whiskerEdState.selectedId=id;
+		this.whiskerEdState.selection.selectedId=id;
 		this.whiskerEdState.editTextMode=false;
 
 		if (id) {
@@ -36,7 +43,7 @@ export default class WhiskerEdHandlers {
 
 	/*handleClick=(ev)=>{
 		let id=this.whiskerEdState.getIdByEl(ev.target);
-		this.whiskerEdState.selectedId=id;
+		this.whiskerEdState.selection.selectedId=id;
 		this.whiskerEdState.editTextMode=false;
 
 		if (id) {
@@ -70,17 +77,17 @@ export default class WhiskerEdHandlers {
 			return;
 
 		if (ev.code=="Delete" || ev.code=="Backspace") {
-			if (!this.whiskerEdState.selectedId)
+			if (!this.whiskerEdState.selection.selectedId)
 				return;
 
 			let v=this.whiskerEdState.value;
-			let p=nodePred(this.whiskerEdState.selectedId);
+			let p=nodePred(this.whiskerEdState.selection.selectedId);
 			let fragment=xmlFragment(v,p);
 			let index=xmlIndex(v,p);
 
 			fragment.splice(index,1);
-			this.whiskerEdState.selectedId=undefined;
-			this.forceUpdate();
+			this.whiskerEdState.selection.selectedId=undefined;
+			this.notifyValueChange();
 		}
 	}
 
@@ -148,8 +155,7 @@ export default class WhiskerEdHandlers {
 		}
 
 		this.whiskerEdState.clearDrag();
-		this.forceUpdate();
-		return;
+		this.notifyValueChange();
 	}
 
 	handleDragStart=(ev)=>{
@@ -172,9 +178,9 @@ export default class WhiskerEdHandlers {
 		if (!this.whiskerEdState.editTextMode)
 			return;
 
-		let editNode=xmlFind(this.whiskerEdState.value,nodePred(this.whiskerEdState.selectedId));
+		let editNode=xmlFind(this.whiskerEdState.value,nodePred(this.whiskerEdState.selection.selectedId));
 		editNode.children=txmlParse(html);
-		this.forceUpdate();
+		this.notifyValueChange();
 	}
 
 	handleTextBlur=(ev)=>{

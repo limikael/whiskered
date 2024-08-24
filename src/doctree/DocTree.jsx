@@ -89,12 +89,12 @@ function DocTreeFragment({fragment, docTreeState, level, handlers}) {
 	</>)
 }
 
-export default function DocTree({value, itemRenderer, class: className, componentLibrary}) {
+export default function DocTree({value, onChange, itemRenderer, class: className, componentLibrary}) {
 	let docTreeState=useConstructor(()=>new DocTreeState({itemRenderer}));
-	docTreeState.preRender({value, componentLibrary});
+	docTreeState.preRender({value,componentLibrary});
 
 	let forceUpdate=useForceUpdate();
-	let handlers=new DocTreeHandlers(docTreeState,forceUpdate);
+	let handlers=new DocTreeHandlers({docTreeState,forceUpdate,onChange});
 
 	//console.log("drag: "+docTreeState.isDrag()+" dropInsertIndex: "+docTreeState.dropInsertIndex);
 	//				onClick={()=>console.log("click...")}

@@ -5,9 +5,16 @@ import {parse as parseXml} from "txml/txml";
 import {txmlStringify} from "../utils/txml-stringify.js";
 
 export default class DocTreeHandlers {
-	constructor(docTreeState, forceUpdate) {
+	constructor({docTreeState, forceUpdate, onChange}) {
 		this.docTreeState=docTreeState;
 		this.forceUpdate=forceUpdate;
+		this.onChange=onChange;
+	}
+
+	notifyValueChange() {
+		this.forceUpdate();
+		if (this.onChange)
+			this.onChange([...this.docTreeState.value]);
 	}
 
 	handleDragEnter=(ev)=>{
@@ -56,6 +63,7 @@ export default class DocTreeHandlers {
 		xmlMove(doc,nodePred(this.docTreeState.dragId),fragment,di);
 		this.docTreeState.clearDrag();
 		this.forceUpdate();
+		this.notifyValueChange();
 	}
 
 	hanleDragEnd=(ev)=>{

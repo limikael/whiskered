@@ -4,6 +4,7 @@ import {elMidpoint, pDist, pSub, pDot, elIsOnEdge} from "../utils/ui-util.js";
 import BidirectionalMap from "../utils/BidirectionalMap.js";
 import {txmlStringify} from "../utils/txml-stringify.js";
 import {nodeInit, nodePred, nodeId} from "./whiskered-util.js";
+import WhiskerEdSelection from "./WhiskerEdSelection.js";
 
 export default class WhiskerEdState {
 	constructor() {
@@ -12,10 +13,12 @@ export default class WhiskerEdState {
 		this.edgeSize=5;
 	}
 
-	preRender({value, componentLibrary}) {
+	preRender({value, componentLibrary, selection}) {
 		xmlMap(value,nodeInit);
 		this.value=value;
 		this.componentLibrary=componentLibrary;
+		if (!selection && !this.selection)
+			this.selection=new WhiskerEdSelection();
 	}
 
 	setNodeEl(nodeId, el) {
