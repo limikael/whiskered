@@ -126,6 +126,11 @@ export default class WhiskerEdHandlers {
 			this.notifySelectionChange();
 	}
 
+	handleMouseOut=(ev)=>{
+		this.whiskerEdState.selection.hoverId=undefined;
+		this.notifySelectionChange();
+	}
+
 	handleDrop=(ev)=>{
 		ev.preventDefault();
 

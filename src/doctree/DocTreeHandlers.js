@@ -128,4 +128,27 @@ export default class DocTreeHandlers {
 		this.docTreeState.selection.selectedId=id;
 		this.notifySelectionChange();
 	}
+
+	handleMouseOut=(ev)=>{
+		this.docTreeState.selection.hoverId=undefined;
+		this.notifySelectionChange();
+	}
+
+	handleKeyDown=(ev)=>{
+		if (ev.code=="Delete" || ev.code=="Backspace") {
+			if (!this.docTreeState.selection.selectedId)
+				return;
+
+			let v=this.docTreeState.value;
+			let p=nodePred(this.docTreeState.selection.selectedId);
+			let fragment=xmlFragment(v,p);
+			let index=xmlIndex(v,p);
+
+			fragment.splice(index,1);
+			this.docTreeState.selection.selectedId=undefined;
+			this.notifyValueChange();
+			this.notifySelectionChange();
+		}
+
+	}
 }

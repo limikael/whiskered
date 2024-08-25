@@ -35,6 +35,11 @@ function WhiskerEdStyle() {
 				outline: 4px solid rgba(255,128,64,.5);
 			}
 
+			.ed-hover {
+				outline: 2px dashed rgba(255,128,64);
+				outline-offset: 2px;
+			}
+
 			.ed-focus .ed-select {
 				outline-color: rgba(255,128,64);
 			}
@@ -135,6 +140,11 @@ function createWhiskerEdClasses(whiskerEdState) {
 			!whiskerEdState.selection.isDrag())
 		addClass(whiskerEdState.selection.selectedId,"ed-select");
 
+	if (whiskerEdState.selection.hoverId &&
+			!whiskerEdState.selection.isDrag() &&
+			whiskerEdState.selection.hoverId!=whiskerEdState.selection.selectedId)
+		addClass(whiskerEdState.selection.hoverId,"ed-hover");
+
 	if (whiskerEdState.selection.isValidDrag()) {
 		let fragment=whiskerEdState.value;
 
@@ -207,6 +217,7 @@ export default function WhiskerEd({value, onChange, selection, onSelectionChange
 				onDragEnter={handlers.handleDragEnter}
 				onDragLeave={handlers.handleDragLeave}
 				onMouseMove={handlers.handleMouseMove}
+				onMouseOut={handlers.handleMouseOut}
 				onDragOver={handlers.handleMouseMove}
 				onDrop={handlers.handleDrop}
 				onDblClick={handlers.handleDblClick}>

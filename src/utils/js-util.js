@@ -32,7 +32,7 @@ export function classStringToArray(classString) {
 
 export function classStringAdd(classString, add) {
 	let current=classStringToArray(classString);
-	current.push(add);
+	current.push(...classStringToArray(add));
 	current=arrayUnique(current);
 
 	return current.join(" ");

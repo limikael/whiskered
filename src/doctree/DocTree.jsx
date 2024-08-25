@@ -46,6 +46,9 @@ function DocTreeNode({node, docTreeState, level, handlers, index}) {
 	else if (id==docTreeState.selection.selectedId)
 		highlight="selected";
 
+	else if (id==docTreeState.selection.hoverId)
+		highlight="hover";
+
 	let expandable=false;
 	let comp=docTreeState.componentLibrary[node.tagName];
 	if (comp && comp.containerType=="children")
@@ -127,7 +130,9 @@ export default function DocTree({value, onChange, selection, onSelectionChange,
 				onMouseMove={handlers.handleMouseMove}
 				onDragOver={handlers.handleMouseMove}
 				onDrop={handlers.handleDrop}
-				onMouseDown={handlers.handleMouseDown}>
+				onMouseDown={handlers.handleMouseDown}
+				onKeyDown={handlers.handleKeyDown}
+				onMouseOut={handlers.handleMouseOut}>
 			<DocTreeFragment 
 					handlers={handlers}
 					fragment={value} 

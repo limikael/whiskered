@@ -5,7 +5,7 @@ import {useWhiskerEdState} from "../whiskered/WhiskerEdState.js"
 import {parse as parseXml} from "txml/txml";
 import DocTree from "../doctree/DocTree.jsx";
 import {Head} from "isoq";
-import {classStringRemove} from "../utils/js-util.js";
+import {classStringRemove, classStringAdd} from "../utils/js-util.js";
 
 let LIBRARY={
 	Hello({color, children}) {
@@ -113,6 +113,10 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 
 			else
 				outerClass+=" bg-grey/50";
+			break;
+
+		case "hover":
+			outerClass=classStringAdd(outerClass,"outline outline-1 outline-dashed -outline-offset-4 hover:outline-none");
 			break;
 	}
 
