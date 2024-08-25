@@ -7,7 +7,6 @@ import WhiskerEdSelection from "../whiskered/WhiskerEdSelection.js";
 export default class DocTreeState {
 	constructor({itemRenderer}) {
 		this.itemRenderer=itemRenderer;
-		this.dragCount=0;
 		this.edgeSize=5;
 		this.elById=new BidirectionalMap();
 		this.expanded=[];
@@ -51,27 +50,6 @@ export default class DocTreeState {
 		return Comp;
 	}
 
-	changeDragCount(v) {
-		this.dragCount+=v;
-		if (this.dragCount<0)
-			this.dragCount=0;
-	}
-
-	isDrag() {
-		return (this.dragCount>0);
-	}
-
-	clearDrag() {
-		this.dragCount=0;
-		this.dragId=undefined;
-	}
-
-	setHoverState({hoverId, dropParentId, dropInsertIndex}) {
-		this.hoverId=hoverId;
-		this.dropParentId=dropParentId;
-		this.dropInsertIndex=dropInsertIndex;
-	}
-
 	getInsertIndex(fragment, mouseLocation) {
 		let closestIndex=undefined;
 		let closestDist=undefined;
@@ -106,11 +84,17 @@ export default class DocTreeState {
 	}
 
 	getDragParentId() {
-		let dragParentNode=xmlParent(this.value,nodePred(this.dragId));
+		let dragParentNode=xmlParent(this.value,nodePred(this.selection.dragId));
 		if (!dragParentNode)
 			return;
 
 		return nodeId(dragParentNode);
+	}
+
+	setHoverState({hoverId, dropParentId, dropInsertIndex}) {
+		this.selection.hoverId=hoverId;
+		this.selection.dropParentId=dropParentId;
+		this.selection.dropInsertIndex=dropInsertIndex;
 	}
 
 	updateHover(el, mousePosition) {
@@ -141,7 +125,8 @@ export default class DocTreeState {
 		if (dropParentId) {
 			let path=xmlPath(this.value,nodePred(dropParentId));
 			let pathIds=path.map(n=>nodeId(n));
-			if (this.dragId && pathIds.includes(this.dragId)) {
+			if (this.selection.dragId && 
+					pathIds.includes(this.selection.dragId)) {
 				this.setHoverState({
 					hoverId: hoverId,
 					dropParentId: "illegal",
@@ -172,9 +157,9 @@ export default class DocTreeState {
 			dropInsertIndex=0;
 
 		// Not meaningful if dragged to same location.
-		if (this.dragId &&
+		if (this.selection.dragId &&
 				dropParentId==this.getDragParentId()) {
-			let currentIndex=xmlIndex(this.value,nodePred(this.dragId));
+			let currentIndex=xmlIndex(this.value,nodePred(this.selection.dragId));
 			if (dropInsertIndex==currentIndex ||
 					dropInsertIndex==currentIndex+1) {
 				this.setHoverState({

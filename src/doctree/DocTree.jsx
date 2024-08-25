@@ -16,27 +16,27 @@ function DocTreeNode({node, docTreeState, level, handlers, index}) {
 	let id=nodeId(node);
 
 	let highlight;
-	if (docTreeState.isDrag()) {
-		if (id==docTreeState.dropParentId &&
-				(!node.children.length || docTreeState.dropInsertIndex===undefined)) {
+	if (docTreeState.selection.isDrag()) {
+		if (id==docTreeState.selection.dropParentId &&
+				(!node.children.length || docTreeState.selection.dropInsertIndex===undefined)) {
 			highlight="dropInside";
 		}
 
-		else if (docTreeState.isDrag()) {
+		else if (docTreeState.selection.isDrag()) {
 			let parentId;
 			let parent=xmlParent(docTreeState.value,nodePred(id));
 			let parentFragment=xmlFragment(docTreeState.value,nodePred(id));
 			if (parent)
 				parentId=nodeId(parent);
 
-			if (parentId==docTreeState.dropParentId) {
-				if (index==docTreeState.dropInsertIndex) {
+			if (parentId==docTreeState.selection.dropParentId) {
+				if (index==docTreeState.selection.dropInsertIndex) {
 					highlight="dropAbove";
 				}
 
-				else if (docTreeState.dropInsertIndex>=parentFragment.length &&
-						index==docTreeState.dropInsertIndex-1 &&
-						docTreeState.dropParentId) {
+				else if (docTreeState.selection.dropInsertIndex>=parentFragment.length &&
+						index==docTreeState.selection.dropInsertIndex-1 &&
+						docTreeState.selection.dropParentId) {
 					highlight="dropBelow";
 				}
 			}
@@ -107,9 +107,9 @@ export default function DocTree({value, onChange, selection, onSelectionChange,
 
 	// Special case when dropping last outside tree.
 	let extra;
-	if (docTreeState.isDrag() &&
-			!docTreeState.dropParentId &&
-			docTreeState.dropInsertIndex>=docTreeState.value.length) {
+	if (docTreeState.selection.isDrag() &&
+			!docTreeState.selection.dropParentId &&
+			docTreeState.selection.dropInsertIndex>=docTreeState.value.length) {
 		let ItemRenderer=docTreeState.itemRenderer;
 		extra=<ItemRenderer level={0} highlight="dropAbove"/>
 	}
@@ -126,7 +126,8 @@ export default function DocTree({value, onChange, selection, onSelectionChange,
 				onDragLeave={handlers.handleDragLeave}
 				onMouseMove={handlers.handleMouseMove}
 				onDragOver={handlers.handleMouseMove}
-				onDrop={handlers.handleDrop}>
+				onDrop={handlers.handleDrop}
+				onMouseDown={handlers.handleMouseDown}>
 			<DocTreeFragment 
 					handlers={handlers}
 					fragment={value} 

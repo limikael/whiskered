@@ -42,81 +42,73 @@ export default class DocTreeHandlers {
 
 	handleDragEnter=(ev)=>{
 		ev.preventDefault();
-		let prev=this.docTreeState.isDrag();
-		this.docTreeState.changeDragCount(1);
-		if (prev!=this.docTreeState.isDrag())
-			this.forceUpdate();
+		let prev=this.docTreeState.selection.clone();
+		this.docTreeState.selection.changeDragCount(1);
+		if (!prev.equals(this.docTreeState))
+			this.notifySelectionChange();
 
 		this.handleMouseMove(ev);
 	}
 
 	handleDragLeave=(ev)=>{
 		ev.preventDefault();
-		let prev=this.docTreeState.isDrag();
-		this.docTreeState.changeDragCount(-1);
-		if (prev!=this.docTreeState.isDrag())
-			this.forceUpdate();
+		let prev=this.docTreeState.selection.clone();
+		this.docTreeState.selection.changeDragCount(-1);
+		if (!prev.equals(this.docTreeState))
+			this.notifySelectionChange();
 	}
 
 	handleDragStart=(ev, id)=>{
-		if (this.docTreeState.dragId)
+		if (this.docTreeState.selection.dragId)
 			return;
 
-		this.docTreeState.dragId=id;
+		this.docTreeState.selection.dragId=id;
 	}
 
 	handleDrop=(ev)=>{
 		ev.preventDefault();
 
-		if (!this.docTreeState.dragId ||
-				this.docTreeState.dropParentId=="illegal") {
-			this.docTreeState.clearDrag();
-			this.forceUpdate();
+		if (!this.docTreeState.selection.dragId ||
+				this.docTreeState.selection.dropParentId=="illegal") {
+			this.docTreeState.selection.clearDrag();
+			this.notifySelectionChange();
 			return;
 		}
 
 		let doc=this.docTreeState.value;
 		let fragment=doc;
-		if (this.docTreeState.dropParentId)
-			fragment=xmlFind(fragment,nodePred(this.docTreeState.dropParentId)).children;
+		if (this.docTreeState.selection.dropParentId)
+			fragment=xmlFind(fragment,nodePred(this.docTreeState.selection.dropParentId)).children;
 
-		//console.log(this.docTreeState.dropInsertIndex);
+		//console.log(this.docTreeState.selection.dropInsertIndex);
 
-		let di=this.docTreeState.dropInsertIndex;
-		xmlMove(doc,nodePred(this.docTreeState.dragId),fragment,di);
-		this.docTreeState.clearDrag();
-		this.forceUpdate();
+		let di=this.docTreeState.selection.dropInsertIndex;
+		xmlMove(doc,nodePred(this.docTreeState.selection.dragId),fragment,di);
+		this.docTreeState.selection.clearDrag();
+		this.notifySelectionChange();
 		this.notifyValueChange();
 	}
 
 	hanleDragEnd=(ev)=>{
-		if (!this.dragId)
+		if (!this.selection.dragId)
 			return;
 
-		this.clearDragState();
-		this.forceUpdate();
+		this.docTreeState.selection.clearDrag();
+		this.notifySelectionChange();
 	}
 
 	handleMouseMove=(ev)=>{
 		if (ev.type=="dragover")
 			ev.preventDefault();
 
-		let prev={
-			hoverId: this.docTreeState.hoverId,
-			dropParentId: this.docTreeState.dropParentId,
-			dropInsertIndex: this.docTreeState.dropInsertIndex
-		};
-
+		let prev=this.docTreeState.selection.clone();
 		let mousePosition={x: ev.clientX, y: ev.clientY};
 		this.docTreeState.updateHover(ev.target,mousePosition);
-
-		if (prev.hoverId!==this.docTreeState.hoverId ||
-				prev.dropParentId!==this.docTreeState.dropParentId ||
-				prev.dropInsertIndex!==this.docTreeState.dropInsertIndex)
-			this.forceUpdate();
+		if (!prev.equals(this.docTreeState.selection))
+			this.notifySelectionChange();
 	}
 
-	handleToggleExpand(id) {
+	handleToggleExpand=(id)=>{
 		if (this.docTreeState.expanded.includes(id))
 			arrayRemove(this.docTreeState.expanded,id);
 
@@ -126,7 +118,13 @@ export default class DocTreeHandlers {
 		this.forceUpdate();
 	}
 
-	handleSelect(id) {
+	handleSelect=(id)=>{
+		this.docTreeState.selection.selectedId=id;
+		this.notifySelectionChange();
+	}
+
+	handleMouseDown=(ev)=>{
+		let id=this.docTreeState.getIdByEl(ev.target);
 		this.docTreeState.selection.selectedId=id;
 		this.notifySelectionChange();
 	}
