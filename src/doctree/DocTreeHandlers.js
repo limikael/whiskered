@@ -25,8 +25,6 @@ export default class DocTreeHandlers {
 	}
 
 	handleFocus=(ev)=>{
-		console.log("handle focus");
-
 		if (this.docTreeState.focus)
 			return;
 
