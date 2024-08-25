@@ -2,6 +2,7 @@ import BidirectionalMap from "../utils/BidirectionalMap.js";
 import {xmlMap, xmlParent, xmlFind, xmlPath, xmlIndex} from "../utils/xml-util.js";
 import {nodeInit, nodeId, nodePred} from "../whiskered/whiskered-util.js";
 import {elIsOnEdge, elMidpoint, pDist, pDot, pSub, elOnLowerHalf} from "../utils/ui-util.js";
+import WhiskerEdSelection from "../whiskered/WhiskerEdSelection.js";
 
 export default class DocTreeState {
 	constructor({itemRenderer}) {
@@ -10,6 +11,17 @@ export default class DocTreeState {
 		this.edgeSize=5;
 		this.elById=new BidirectionalMap();
 		this.expanded=[];
+	}
+
+	preRender({value, componentLibrary, selection}) {
+		xmlMap(value,nodeInit);
+		this.value=value;
+		this.componentLibrary=componentLibrary;
+		if (selection)
+			this.selection=selection;
+
+		if (!this.selection)
+			this.selection=new WhiskerEdSelection();
 	}
 
 	setNodeEl(nodeId, el) {
@@ -29,12 +41,6 @@ export default class DocTreeState {
 
 			el=el.parentElement;
 		}
-	}
-
-	preRender({value, componentLibrary}) {
-		xmlMap(value,nodeInit);
-		this.value=value;
-		this.componentLibrary=componentLibrary;
 	}
 
 	getNodeComponent(node) {

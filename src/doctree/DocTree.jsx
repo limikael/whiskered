@@ -22,7 +22,7 @@ function DocTreeNode({node, docTreeState, level, handlers, index}) {
 			highlight="dropInside";
 		}
 
-		else {
+		else if (docTreeState.isDrag()) {
 			let parentId;
 			let parent=xmlParent(docTreeState.value,nodePred(id));
 			let parentFragment=xmlFragment(docTreeState.value,nodePred(id));
@@ -42,6 +42,9 @@ function DocTreeNode({node, docTreeState, level, handlers, index}) {
 			}
 		}
 	}
+
+	else if (id==docTreeState.selection.selectedId)
+		highlight="selected";
 
 	let expandable=false;
 	let comp=docTreeState.componentLibrary[node.tagName];
@@ -63,7 +66,9 @@ function DocTreeNode({node, docTreeState, level, handlers, index}) {
 						highlight={highlight}
 						expandable={expandable}
 						expanded={expanded}
-						onToggleExpand={()=>handlers.handleToggleExpand(id)}/>
+						onToggleExpand={()=>handlers.handleToggleExpand(id)}
+						onSelect={()=>handlers.handleSelect(id)}
+						focus={docTreeState.focus}/>
 			</div>
 			{expanded &&
 				<DocTreeFragment 
@@ -89,12 +94,13 @@ function DocTreeFragment({fragment, docTreeState, level, handlers}) {
 	</>)
 }
 
-export default function DocTree({value, onChange, itemRenderer, class: className, componentLibrary}) {
+export default function DocTree({value, onChange, selection, onSelectionChange, 
+		itemRenderer, class: className, componentLibrary}) {
 	let docTreeState=useConstructor(()=>new DocTreeState({itemRenderer}));
-	docTreeState.preRender({value,componentLibrary});
+	docTreeState.preRender({value,componentLibrary,selection});
 
 	let forceUpdate=useForceUpdate();
-	let handlers=new DocTreeHandlers({docTreeState,forceUpdate,onChange});
+	let handlers=new DocTreeHandlers({docTreeState,forceUpdate,onChange,onSelectionChange});
 
 	//console.log("drag: "+docTreeState.isDrag()+" dropInsertIndex: "+docTreeState.dropInsertIndex);
 	//				onClick={()=>console.log("click...")}
@@ -108,8 +114,14 @@ export default function DocTree({value, onChange, itemRenderer, class: className
 		extra=<ItemRenderer level={0} highlight="dropAbove"/>
 	}
 
+	//console.log("focus: "+docTreeState.focus);
+
 	return (
 		<div class={className}
+				style="outline: none"
+				tabIndex={0}
+				onFocus={handlers.handleFocus}
+				onBlur={handlers.handleBlur}
 				onDragEnter={handlers.handleDragEnter}
 				onDragLeave={handlers.handleDragLeave}
 				onMouseMove={handlers.handleMouseMove}

@@ -5,16 +5,41 @@ import {parse as parseXml} from "txml/txml";
 import {txmlStringify} from "../utils/txml-stringify.js";
 
 export default class DocTreeHandlers {
-	constructor({docTreeState, forceUpdate, onChange}) {
+	constructor({docTreeState, forceUpdate, onChange, onSelectionChange}) {
 		this.docTreeState=docTreeState;
 		this.forceUpdate=forceUpdate;
 		this.onChange=onChange;
+		this.onSelectionChange=onSelectionChange;
 	}
 
 	notifyValueChange() {
 		this.forceUpdate();
 		if (this.onChange)
 			this.onChange([...this.docTreeState.value]);
+	}
+
+	notifySelectionChange() {
+		this.forceUpdate();
+		if (this.onSelectionChange)
+			this.onSelectionChange(this.docTreeState.selection.clone());
+	}
+
+	handleFocus=(ev)=>{
+		console.log("handle focus");
+
+		if (this.docTreeState.focus)
+			return;
+
+		this.docTreeState.focus=true;
+		this.forceUpdate();
+	}
+
+	handleBlur=(ev)=> {
+		if (!this.docTreeState.focus)
+			return;
+
+		this.docTreeState.focus=false;
+		this.forceUpdate();
 	}
 
 	handleDragEnter=(ev)=>{
@@ -101,5 +126,10 @@ export default class DocTreeHandlers {
 			this.docTreeState.expanded.push(id);
 
 		this.forceUpdate();
+	}
+
+	handleSelect(id) {
+		this.docTreeState.selection.selectedId=id;
+		this.notifySelectionChange();
 	}
 }

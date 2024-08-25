@@ -40,7 +40,7 @@ export function classStringAdd(classString, add) {
 
 export function classStringRemove(classString, remove) {
 	let current=classStringToArray(classString);
-	return arrayRemove(current,remove);
+	return arrayRemove(current,remove).join(" ");
 }
 
 export function isStringy(s) {

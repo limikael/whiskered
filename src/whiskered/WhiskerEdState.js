@@ -17,7 +17,10 @@ export default class WhiskerEdState {
 		xmlMap(value,nodeInit);
 		this.value=value;
 		this.componentLibrary=componentLibrary;
-		if (!selection && !this.selection)
+		if (selection)
+			this.selection=selection;
+
+		if (!this.selection)
 			this.selection=new WhiskerEdSelection();
 	}
 

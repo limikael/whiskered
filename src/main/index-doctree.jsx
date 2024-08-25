@@ -2,8 +2,9 @@ import {useState} from "react";
 import DocTree from "../doctree/DocTree.jsx";
 import {parse as parseXml} from "txml/txml";
 import {Head} from "isoq";
+import {classStringRemove} from "../utils/js-util.js";
 
-function ItemRenderer({value, level, expandable, expanded, highlight, onToggleExpand}) {
+function ItemRenderer({value, level, expandable, expanded, highlight, onToggleExpand, onSelect}) {
 	let label;
 	if (typeof value=="string")
 		label="#text";
@@ -11,6 +12,7 @@ function ItemRenderer({value, level, expandable, expanded, highlight, onToggleEx
 	else if (value)
 		label=value.tagName;
 
+	let outerClass="border-b py-[2px] hover:bg-lightgrey";
 	let outerStyle={
 		paddingLeft: (16+(level*16))+"px",
 	};
@@ -29,6 +31,11 @@ function ItemRenderer({value, level, expandable, expanded, highlight, onToggleEx
 		case "dropBelow":
 			innerStyle.boxShadow="0px 4px 0 0px #000";
 			break;
+
+		case "selected":
+			outerClass=classStringRemove(outerClass,"hover:bg-lightgrey");
+			outerClass+=" bg-grey";
+			break;
 	}
 
 	if (value===undefined) 
@@ -39,19 +46,22 @@ function ItemRenderer({value, level, expandable, expanded, highlight, onToggleEx
 		);
 
 	return (
-		<div class="border-b py-[2px] hover:bg-grey" style={outerStyle}>
+		<div class={outerClass} style={outerStyle}
+				onMouseDown={onSelect}>
 			<div style={innerStyle} class={innerClass}>
 				{expandable && expanded &&
 					<span class="inline-block w-[24px] material-symbols-outlined"
 							style="vertical-align: middle"
-							onClick={onToggleExpand}>
+							onClick={ev=>{ev.stopPropagation(); onToggleExpand()}}
+							onMouseDown={ev=>ev.stopPropagation()}>
 						arrow_drop_down
 					</span>
 				}
 				{expandable && !expanded &&
 					<span class="inline-block w-[24px] material-symbols-outlined"
 							style="vertical-align: middle"
-							onClick={onToggleExpand}>
+							onClick={ev=>{ev.stopPropagation(); onToggleExpand()}}
+							onMouseDown={ev=>ev.stopPropagation()}>
 						arrow_right
 					</span>
 				}
@@ -96,6 +106,8 @@ export default function() {
 		</Hello>
 	`));
 
+	let [selection,setSelection]=useState();
+
 	return (<>
         <Head>
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -103,9 +115,11 @@ export default function() {
 		<div class="absolute top-0 left-0 h-full w-full p-10">
 			<div class="border-s px-2 w-80 h-full overflow-y-auto">
 				<DocTree 
-					class="border-t h-full"
 					value={value}
 					onChange={v=>setValue(v)}
+					selection={selection}
+					onSelectionChange={s=>setSelection(s)}
+					class="border-t h-full"
 					itemRenderer={ItemRenderer}
 					componentLibrary={COMPONENT_LIBRARY}/>
 			</div>

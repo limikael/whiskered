@@ -4,16 +4,23 @@ import {txmlStringify, txmlParse} from "../utils/txml-stringify.js";
 import {isStringy} from "../utils/js-util.js";
 
 export default class WhiskerEdHandlers {
-	constructor({whiskerEdState, forceUpdate, onChange}) {
+	constructor({whiskerEdState, forceUpdate, onChange, onSelectionChange}) {
 		this.whiskerEdState=whiskerEdState;
 		this.forceUpdate=forceUpdate;
 		this.onChange=onChange;
+		this.onSelectionChange=onSelectionChange;
 	}
 
 	notifyValueChange() {
 		this.forceUpdate();
 		if (this.onChange)
 			this.onChange([...this.whiskerEdState.value]);
+	}
+
+	notifySelectionChange() {
+		this.forceUpdate();
+		if (this.onSelectionChange)
+			this.onSelectionChange(this.whiskerEdState.selection.clone());
 	}
 
 	handleMouseDown=(ev)=>{
@@ -23,7 +30,7 @@ export default class WhiskerEdHandlers {
 
 		this.whiskerEdState.editTextMode=false;
 		this.whiskerEdState.selection.selectedId=id;
-		this.forceUpdate();
+		this.notifySelectionChange();
 	}
 
 	handleDblClick=(ev)=>{
@@ -38,7 +45,7 @@ export default class WhiskerEdHandlers {
 				this.whiskerEdState.editTextMode=true;
 		}
 
-		this.forceUpdate();
+		this.notifySelectionChange();
 	}
 
 	/*handleClick=(ev)=>{
@@ -88,6 +95,7 @@ export default class WhiskerEdHandlers {
 			fragment.splice(index,1);
 			this.whiskerEdState.selection.selectedId=undefined;
 			this.notifyValueChange();
+			this.notifySelectionChange();
 		}
 	}
 

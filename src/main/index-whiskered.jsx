@@ -5,6 +5,7 @@ import {useWhiskerEdState} from "../whiskered/WhiskerEdState.js"
 import {parse as parseXml} from "txml/txml";
 import DocTree from "../doctree/DocTree.jsx";
 import {Head} from "isoq";
+import {classStringRemove} from "../utils/js-util.js";
 
 let LIBRARY={
 	Hello({color, children}) {
@@ -77,7 +78,7 @@ function ComponentLibrary({componentLibrary}) {
 	</>);
 }
 
-function DocTreeItem({value, level, expandable, expanded, highlight, onToggleExpand}) {
+function DocTreeItem({value, level, expandable, expanded, highlight, focus, onToggleExpand, onSelect}) {
 	let label;
 	if (typeof value=="string")
 		label="#text";
@@ -85,6 +86,7 @@ function DocTreeItem({value, level, expandable, expanded, highlight, onToggleExp
 	else if (value)
 		label=value.tagName;
 
+	let outerClass="border-b py-[2px] hover:bg-lightgrey";
 	let outerStyle={
 		paddingLeft: (16+(level*16))+"px",
 	};
@@ -103,6 +105,15 @@ function DocTreeItem({value, level, expandable, expanded, highlight, onToggleExp
 		case "dropBelow":
 			innerStyle.boxShadow="0px 4px 0 0px #000";
 			break;
+
+		case "selected":
+			outerClass=classStringRemove(outerClass,"hover:bg-lightgrey");
+			if (focus)
+				outerClass+=" bg-grey";
+
+			else
+				outerClass+=" bg-grey/50";
+			break;
 	}
 
 	if (value===undefined) 
@@ -113,19 +124,22 @@ function DocTreeItem({value, level, expandable, expanded, highlight, onToggleExp
 		);
 
 	return (
-		<div class="border-b py-[2px] hover:bg-grey" style={outerStyle}>
+		<div class={outerClass} style={outerStyle}
+				onMouseDown={onSelect}>
 			<div style={innerStyle} class={innerClass}>
 				{expandable && expanded &&
 					<span class="inline-block w-[24px] material-symbols-outlined"
 							style="vertical-align: middle"
-							onClick={onToggleExpand}>
+							onClick={ev=>{ev.stopPropagation(); onToggleExpand()}}
+							onMouseDown={ev=>ev.stopPropagation()}>
 						arrow_drop_down
 					</span>
 				}
 				{expandable && !expanded &&
 					<span class="inline-block w-[24px] material-symbols-outlined"
 							style="vertical-align: middle"
-							onClick={onToggleExpand}>
+							onClick={ev=>{ev.stopPropagation(); onToggleExpand()}}
+							onMouseDown={ev=>ev.stopPropagation()}>
 						arrow_right
 					</span>
 				}
@@ -151,6 +165,8 @@ export default function() {
 		<Test color="#ffc0c0"/>
 	`));
 
+	let [selection,setSelection]=useState();
+
 	/*let [value,setValue]=useState(()=>parseXml(`
 		<Hello color="#e0d0c0">
 			This text shouldn't be here but it is kind of long...
@@ -175,7 +191,7 @@ export default function() {
 		</Text>
 	`));*/
 
-	console.log("render...");
+	//console.log("render, sel: ",selection);
 
 	return (<>
         <Head>
@@ -189,14 +205,18 @@ export default function() {
 				<WhiskerEd 
 						value={value}
 						onChange={v=>setValue(v)}
+						selection={selection}
+						onSelectionChange={s=>setSelection(s)}
 						componentLibrary={LIBRARY}
 						class="absolute top-0 bottom-0 left-0 right-0 overflow-auto"/>
 			</div>
 			<div class="w-60 shrink-0 p-5">
 				<DocTree 
-					class="border-t h-full"
 					value={value}
 					onChange={v=>setValue(v)}
+					selection={selection}
+					onSelectionChange={s=>setSelection(s)}
+					class="border-t h-full"
 					itemRenderer={DocTreeItem}
 					componentLibrary={LIBRARY}/>
 			</div>

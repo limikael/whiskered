@@ -173,12 +173,12 @@ function createWhiskerEdClasses(whiskerEdState) {
 	return classes;	
 }
 
-export default function WhiskerEd({value, onChange, selection, componentLibrary, class: cls}) {
+export default function WhiskerEd({value, onChange, selection, onSelectionChange, componentLibrary, class: cls}) {
 	let whiskerEdState=useConstructor(()=>new WhiskerEdState());
-	whiskerEdState.preRender({value, componentLibrary, selection});
+	whiskerEdState.preRender({value, selection, componentLibrary});
 
 	let forceUpdate=useForceUpdate();
-	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate, onChange});
+	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate, onChange, onSelectionChange});
 
 	if (whiskerEdState.focus)
 		cls=classStringAdd(cls,"ed-focus");
@@ -190,10 +190,6 @@ export default function WhiskerEd({value, onChange, selection, componentLibrary,
 
 	else
 		cls=classStringAdd(cls,"outline-none");
-
-	//console.log(whiskerEdState.selection.selectedId);
-	//console.log("render, text: "+whiskerEdState.editTextMode);
-	//onClick={handlers.handleClick}
 
 	return (
 		<div class={classStringAdd(cls,"cursor-default !select-none")}
