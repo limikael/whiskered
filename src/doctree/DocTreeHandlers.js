@@ -44,7 +44,7 @@ export default class DocTreeHandlers {
 		ev.preventDefault();
 		let prev=this.docTreeState.selection.clone();
 		this.docTreeState.selection.changeDragCount(1);
-		if (!prev.equals(this.docTreeState))
+		if (!prev.equals(this.docTreeState.selection))
 			this.notifySelectionChange();
 
 		this.handleMouseMove(ev);
@@ -54,7 +54,7 @@ export default class DocTreeHandlers {
 		ev.preventDefault();
 		let prev=this.docTreeState.selection.clone();
 		this.docTreeState.selection.changeDragCount(-1);
-		if (!prev.equals(this.docTreeState))
+		if (!prev.equals(this.docTreeState.selection))
 			this.notifySelectionChange();
 	}
 

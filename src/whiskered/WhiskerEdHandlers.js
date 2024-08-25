@@ -101,81 +101,71 @@ export default class WhiskerEdHandlers {
 
 	handleDragEnter=(ev)=>{
 		ev.preventDefault();
-		let prev=this.whiskerEdState.isDrag();
-		this.whiskerEdState.changeDragCount(1);
-		if (prev!=this.whiskerEdState.isDrag())
-			this.forceUpdate();
+		let prev=this.whiskerEdState.selection.clone();
+		this.whiskerEdState.selection.changeDragCount(1);
+		if (!prev.equals(this.whiskerEdState.selection))
+			this.notifySelectionChange();
 	}
 
 	handleDragLeave=(ev)=>{
 		ev.preventDefault();
-		let prev=this.whiskerEdState.isDrag();
-		this.whiskerEdState.changeDragCount(-1);
-		if (prev!=this.whiskerEdState.isDrag())
-			this.forceUpdate();
+		let prev=this.whiskerEdState.selection.clone();
+		this.whiskerEdState.selection.changeDragCount(1);
+		if (!prev.equals(this.whiskerEdState.selection))
+			this.notifySelectionChange();
 	}
 
 	handleMouseMove=(ev)=>{
 		if (ev.type=="dragover")
 			ev.preventDefault();
 
-		let prev={
-			hoverId: this.whiskerEdState.hoverId,
-			dropParentId: this.whiskerEdState.dropParentId,
-			dropInsertIndex: this.whiskerEdState.dropInsertIndex,
-//			dropLayoutDirection: this.whiskerEdState.dropLayoutDirection
-		};
-
+		let prev=this.whiskerEdState.selection.clone();
 		let mousePosition={x: ev.clientX, y: ev.clientY};
 		this.whiskerEdState.updateHover(ev.target,mousePosition);
-
-		if (prev.hoverId!==this.whiskerEdState.hoverId ||
-				prev.dropParentId!==this.whiskerEdState.dropParentId ||
-				prev.dropInsertIndex!==this.whiskerEdState.dropInsertIndex)// ||
-//				prev.dropLayoutDirection!==this.whiskerEdState.dropLayoutDirection)
-			this.forceUpdate();
+		if (!prev.equals(this.whiskerEdState.selection))
+			this.notifySelectionChange();
 	}
 
 	handleDrop=(ev)=>{
 		ev.preventDefault();
 
-		if (this.whiskerEdState.isValidDrag()) {
-			if (this.whiskerEdState.dragId) {
+		if (this.whiskerEdState.selection.isValidDrag()) {
+			if (this.whiskerEdState.selection.dragId) {
 				let doc=this.whiskerEdState.value;
 				let fragment=doc;
-				if (this.whiskerEdState.dropParentId)
-					fragment=xmlFind(fragment,nodePred(this.whiskerEdState.dropParentId)).children;
+				if (this.whiskerEdState.selection.dropParentId)
+					fragment=xmlFind(fragment,nodePred(this.whiskerEdState.selection.dropParentId)).children;
 
-				let di=this.whiskerEdState.dropInsertIndex;
-				xmlMove(doc,nodePred(this.whiskerEdState.dragId),fragment,di);
+				let di=this.whiskerEdState.selection.dropInsertIndex;
+				xmlMove(doc,nodePred(this.whiskerEdState.selection.dragId),fragment,di);
 			}
 
 			else if (ev.dataTransfer.getData("whiskered")) {
 				let dropData=ev.dataTransfer.getData("whiskered");
-				let dpi=this.whiskerEdState.dropParentId;
+				let dpi=this.whiskerEdState.selection.dropParentId;
 				let fragment=this.whiskerEdState.value;
 				if (dpi)
 					fragment=xmlFind(fragment,nodePred(dpi)).children;
 
 				let childNode=txmlParse(dropData)[0];
-				fragment.splice(this.whiskerEdState.dropInsertIndex,0,childNode);
+				fragment.splice(this.whiskerEdState.selection.dropInsertIndex,0,childNode);
 			}
 		}
 
-		this.whiskerEdState.clearDrag();
+		this.whiskerEdState.selection.clearDrag();
 		this.notifyValueChange();
 	}
 
 	handleDragStart=(ev)=>{
-		if (this.whiskerEdState.dragId)
+		if (this.whiskerEdState.selection.dragId)
 			return;
 
-		this.whiskerEdState.dragId=this.whiskerEdState.getIdByEl(ev.target);
+		this.whiskerEdState.selection.dragId=this.whiskerEdState.getIdByEl(ev.target);
 		this.forceUpdate();
 	}
 
 	handleDragEnd=(ev)=>{
-		if (!this.dragId)
+		if (!this.whiskerEdState.selection.dragId)
 			return;
 
 		this.clearDragState();

@@ -132,13 +132,15 @@ function createWhiskerEdClasses(whiskerEdState) {
 	}
 
 	if (whiskerEdState.selection.selectedId && 
-			!whiskerEdState.isDrag())
+			!whiskerEdState.selection.isDrag())
 		addClass(whiskerEdState.selection.selectedId,"ed-select");
 
-	if (whiskerEdState.isValidDrag()) {
+	if (whiskerEdState.selection.isValidDrag()) {
 		let fragment=whiskerEdState.value;
-		if (whiskerEdState.dropParentId) {
-			let node=xmlFind(whiskerEdState.value,nodePred(whiskerEdState.dropParentId));
+
+		//console.log(whiskerEdState.dropParentId);
+		if (whiskerEdState.selection.dropParentId) {
+			let node=xmlFind(whiskerEdState.value,nodePred(whiskerEdState.selection.dropParentId));
 			fragment=node.children;
 		}
 
@@ -154,19 +156,23 @@ function createWhiskerEdClasses(whiskerEdState) {
 
 			let dropClasses=directionDropClasses[whiskerEdState.getDropLayoutDirection()];
 
-			if (whiskerEdState.dropInsertIndex>=fragment.length) {
+			let di=whiskerEdState.selection.dropInsertIndex;
+			if (di===undefined)
+				di=fragment.length;
+
+			if (di>=fragment.length) {
 				let id=nodeId(fragment[fragment.length-1]);
 				addClass(id,dropClasses[1]);
 			}
 
 			else {
-				let id=nodeId(fragment[whiskerEdState.dropInsertIndex]);
+				let id=nodeId(fragment[whiskerEdState.selection.dropInsertIndex]);
 				addClass(id,dropClasses[0]);
 			}
 		}
 
 		else {
-			addClass(whiskerEdState.dropParentId,"ed-drag");
+			addClass(whiskerEdState.selection.dropParentId,"ed-drag");
 		}
 	}
 
@@ -183,8 +189,8 @@ export default function WhiskerEd({value, onChange, selection, onSelectionChange
 	if (whiskerEdState.focus)
 		cls=classStringAdd(cls,"ed-focus");
 
-	if (whiskerEdState.isValidDrag() &&
-			!whiskerEdState.dropParentId &&
+	if (whiskerEdState.selection.isValidDrag() &&
+			!whiskerEdState.selection.dropParentId &&
 			!whiskerEdState.value.length)
 		cls=classStringAdd(cls,"ed-drag");
 

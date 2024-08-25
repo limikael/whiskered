@@ -43,7 +43,7 @@ export default class WhiskerEdState {
 		}
 	}
 
-	isDrag() {
+	/*isDrag() {
 		return (this.dragCount>0);
 	}
 
@@ -60,7 +60,7 @@ export default class WhiskerEdState {
 	clearDrag() {
 		this.dragCount=0;
 		this.dragId=undefined;
-	}
+	}*/
 
 	getInsertIndex(fragment, mouseLocation, layoutDirection) {
 		let closestIndex=undefined;
@@ -100,9 +100,9 @@ export default class WhiskerEdState {
 	}
 
 	setHoverState({hoverId, dropParentId, dropInsertIndex/*, dropLayoutDirection*/}) {
-		this.hoverId=hoverId;
-		this.dropParentId=dropParentId;
-		this.dropInsertIndex=dropInsertIndex;
+		this.selection.hoverId=hoverId;
+		this.selection.dropParentId=dropParentId;
+		this.selection.dropInsertIndex=dropInsertIndex;
 		//this.dropLayoutDirection=dropLayoutDirection;
 	}
 
@@ -115,10 +115,10 @@ export default class WhiskerEdState {
 	}
 
 	getDropLayoutDirection() {
-		if (!this.dropParentId)
+		if (!this.selection.dropParentId)
 			return "down";
 
-		let node=xmlFind(this.value,nodePred(this.dropParentId));
+		let node=xmlFind(this.value,nodePred(this.selection.dropParentId));
 		let Comp=this.getNodeComponent(node);
 		if (Comp && Comp.layoutDirection)
 			return Comp.layoutDirection;
@@ -148,7 +148,7 @@ export default class WhiskerEdState {
 		if (dropParentId) {
 			let path=xmlPath(this.value,nodePred(dropParentId));
 			let pathIds=path.map(n=>nodeId(n));
-			if (this.dragId && pathIds.includes(this.dragId)) {
+			if (this.selection.dragId && pathIds.includes(this.selection.dragId)) {
 				this.setHoverState({
 					hoverId: hoverId,
 					dropParentId: "illegal",
@@ -181,14 +181,14 @@ export default class WhiskerEdState {
 		}
 
 		// Not meaningful if dragged to same location.
-		if (this.dragId) {
+		if (this.selection.dragId) {
 			let dragParentNodeId;
-			let dragParentNode=xmlParent(this.value,nodePred(this.dragId));
+			let dragParentNode=xmlParent(this.value,nodePred(this.selection.dragId));
 			if (dragParentNode)
 				dragParentNodeId=nodeId(dragParentNode);
 
 			if (dragParentNodeId==dropParentId) {
-				let currentIndex=xmlIndex(this.value,nodePred(this.dragId));
+				let currentIndex=xmlIndex(this.value,nodePred(this.selection.dragId));
 				if (dropInsertIndex==currentIndex ||
 						dropInsertIndex==currentIndex+1) {
 					this.setHoverState({
