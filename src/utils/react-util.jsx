@@ -1,4 +1,5 @@
-import {useRef, useState, useLayoutEffect, useCallback, cloneElement, useEffect} from "react";
+import {useRef, useState, useLayoutEffect, useCallback, cloneElement, useEffect, createElement} from "react";
+import {isStringy} from "./js-util.js";
 
 export function useConstructor(fn) {
 	let value=useRef();
@@ -38,7 +39,16 @@ export function InterjectRender({interjectComponent, interjectProps, ...props}) 
 	if (!interjectComponent)
 		return;
 
-	let el=interjectComponent(props);
+	let el;
+	if (isStringy(interjectComponent))
+		el=createElement(interjectComponent.toString(),props,props.children);
+
+	else if (typeof interjectComponent=="function")
+		el=interjectComponent(props);
+
+	else
+		throw new Error("expected component to be string or function");
+
 	interjectProps(el.props);
 	el=cloneElement(el,el.props);
 

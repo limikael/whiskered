@@ -5,9 +5,12 @@ import {elIsOnEdge, elMidpoint, pDist, pDot, pSub, elOnLowerHalf} from "../utils
 import WhiskerEdSelection from "../whiskered/WhiskerEdSelection.js";
 
 export default class DocTreeState {
-	constructor({itemRenderer}) {
+	constructor({itemRenderer, edgeSize}) {
 		this.itemRenderer=itemRenderer;
-		this.edgeSize=5;
+		this.edgeSize=edgeSize;
+		if (!this.edgeSize)
+			this.edgeSize=5;
+
 		this.elById=new BidirectionalMap();
 		this.expanded=[];
 	}

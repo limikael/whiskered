@@ -60,7 +60,18 @@ function WhiskerEdFragment({fragment, whiskerEdState, classes, handlers}) {
 }
 
 function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
-	let Component=whiskerEdState.componentLibrary[node.tagName];
+	let Component;
+	if (!isStringy(node)) {
+		if (node.tagName.charAt(0).toLowerCase()==node.tagName.charAt(0)) {
+			Component=new String(node.tagName);
+			Object.assign(Component,whiskerEdState.componentLibrary[node.tagName]);
+		}
+
+		else {
+			Component=whiskerEdState.componentLibrary[node.tagName];
+		}
+	}
+
 	let props=node.attributes;
 
 	function interjectProps(props) {

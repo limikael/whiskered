@@ -49,10 +49,18 @@ function DocTreeNode({node, docTreeState, level, handlers, index}) {
 	else if (id==docTreeState.selection.hoverId)
 		highlight="hover";
 
+
 	let expandable=false;
 	let comp=docTreeState.componentLibrary[node.tagName];
-	if (comp && comp.containerType=="children")
-		expandable=true;
+	//console.log(docTreeState.componentLibrary);
+	//console.log(node.tagName," ",comp);
+	if (comp) {
+		if (comp.containerType=="children")
+			expandable=true;
+
+		if (comp.containerType!="richtext" && node.children && node.children.length)
+			expandable=true;
+	} 
 
 	let expanded=docTreeState.expanded.includes(id);
 
@@ -60,8 +68,7 @@ function DocTreeNode({node, docTreeState, level, handlers, index}) {
 		<div draggable={true} 
 				style={style} 
 				onDragStart={ev=>handlers.handleDragStart(ev, id)}
-				onDragEnd={handlers.handleDragEnd}
-				>
+				onDragEnd={handlers.handleDragEnd}>
 			<div ref={el=>docTreeState.setNodeEl(id,el)}>
 				<ItemRenderer
 						value={node}
@@ -98,8 +105,8 @@ function DocTreeFragment({fragment, docTreeState, level, handlers}) {
 }
 
 export default function DocTree({value, onChange, selection, onSelectionChange, 
-		itemRenderer, class: className, componentLibrary}) {
-	let docTreeState=useConstructor(()=>new DocTreeState({itemRenderer}));
+		itemRenderer, class: className, componentLibrary, edgeSize}) {
+	let docTreeState=useConstructor(()=>new DocTreeState({itemRenderer, edgeSize}));
 	docTreeState.preRender({value,componentLibrary,selection});
 
 	let forceUpdate=useForceUpdate();

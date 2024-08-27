@@ -8,6 +8,8 @@ import {Head} from "isoq";
 import {classStringRemove, classStringAdd} from "../utils/js-util.js";
 
 let LIBRARY={
+	div: {containerType: "children"},
+	span: {containerType: "richtext"},
 	Hello({color, children}) {
 		return (<div class="border p-5 m-5" style={`background-color: ${color};`}>
 			The hello component...
@@ -158,6 +160,9 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 
 export default function() {
 	let [value,setValue]=useState(()=>parseXml(`
+		<div>
+			<span>this is a span in a div</span>
+		</div>
 		<Hello color="#e0d0c0">
 			<Test color="#ffc0c0"/>
 			<Test color="#c0c0ff"/>
