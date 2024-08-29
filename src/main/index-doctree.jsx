@@ -1,8 +1,8 @@
 import {useState} from "react";
 import DocTree from "../doctree/DocTree.jsx";
-import {parse as parseXml} from "txml/txml";
 import {Head} from "isoq";
 import {classStringRemove} from "../utils/js-util.js";
+import {txmlParse} from "../utils/txml-stringify.js";
 
 function ItemRenderer({value, level, expandable, expanded, highlight, onToggleExpand, onSelect}) {
 	let label;
@@ -81,7 +81,7 @@ COMPONENT_LIBRARY.Text=()=>{};
 COMPONENT_LIBRARY.Child=()=>{};
 
 export default function() {
-	let [value,setValue]=useState(()=>parseXml(`
+	let [value,setValue]=useState(()=>txmlParse(`
 		<Hello color="#e0d0c0">
 			<Undef/>
 			<Hello>

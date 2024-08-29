@@ -1,5 +1,5 @@
 import BidirectionalMap from "../utils/BidirectionalMap.js";
-import {xmlMap, xmlParent, xmlFind, xmlPath, xmlIndex} from "../utils/xml-util.js";
+import {xmlForEach, xmlParent, xmlFind, xmlPath, xmlIndex} from "../utils/xml-util.js";
 import {nodeInit, nodeId, nodePred} from "../whiskered/whiskered-util.js";
 import {elIsOnEdge, elMidpoint, pDist, pDot, pSub, elOnLowerHalf} from "../utils/ui-util.js";
 import WhiskerEdSelection from "../whiskered/WhiskerEdSelection.js";
@@ -16,7 +16,7 @@ export default class DocTreeState {
 	}
 
 	preRender({value, componentLibrary, selection}) {
-		xmlMap(value,nodeInit);
+		xmlForEach(value,nodeInit);
 		this.value=value;
 		this.componentLibrary=componentLibrary;
 		if (selection)

@@ -55,11 +55,13 @@ export function InterjectRender({interjectComponent, interjectProps, ...props}) 
 	return el;
 }
 
-export function ContentEditable({class: className, initialValue, onChange, onBlur, element}) {
+export function ContentEditable({class: className, style, initialValue, onChange, onBlur, element}) {
 	let initialValueRef=useRef(initialValue);
 	let ref=useRef();
 
 	function handleInput(ev) {
+		console.log("change ",ev.target.innerHTML);
+
 		if (!onChange)
 			return;
 
@@ -82,6 +84,7 @@ export function ContentEditable({class: className, initialValue, onChange, onBlu
 				onBlur={onBlur}
 				onInput={handleInput}
 				class={className}
+				style={style}
 				contenteditable={true}
 				dangerouslySetInnerHTML={{__html: initialValueRef.current}}
 				ref={ref}/>

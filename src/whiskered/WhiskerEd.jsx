@@ -8,6 +8,8 @@ import {nodeId, nodePred} from "./whiskered-util.js";
 import {xmlFind} from "../utils/xml-util.js";
 
 function WhiskerEdStyle() {
+//				outline-offset: -2px;
+
 	return (
 		<style>{`
 			.ed-drag {
@@ -89,18 +91,24 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 	if (Component && Component.containerType=="richtext") {
 		if (whiskerEdState.selection.selectedId==nodeId(node) &&
 				whiskerEdState.editTextMode) {
-			content=(
+			content=(<>
+				<span>&#8203;</span>
 				<ContentEditable
 						initialValue={txmlStringify(node.children,{pretty: false})}
-						class="outline-none cursor-text"
+						style={{outline: "none", cursor: "text", minHeight: "1em"}}
 						element="span"
 						onChange={handlers.handleTextChange}
 						onBlur={handlers.handleTextBlur}/>
-			);
+			</>);
 		}
 
 		else {
-			content=<span dangerouslySetInnerHTML={{__html: txmlStringify(node.children,{pretty: false})}}/>;
+			let html=txmlStringify(node.children,{pretty: false});
+			if (!html.trim())
+				content=<span style={{opacity: "0.5"}}>&lt;text&gt;</span>
+
+			else
+				content=<span dangerouslySetInnerHTML={{__html: html}}/>;
 		}
 	}
 
@@ -206,6 +214,10 @@ export default function WhiskerEd({value, onChange, selection, onSelectionChange
 
 	let forceUpdate=useForceUpdate();
 	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate, onChange, onSelectionChange});
+	let style={
+		cursor: "defalt",
+		userSelect: "none"
+	};
 
 	if (whiskerEdState.focus)
 		cls=classStringAdd(cls,"ed-focus");
@@ -216,10 +228,11 @@ export default function WhiskerEd({value, onChange, selection, onSelectionChange
 		cls=classStringAdd(cls,"ed-drag");
 
 	else
-		cls=classStringAdd(cls,"outline-none");
+		style.outline="none";
 
 	return (
-		<div class={classStringAdd(cls,"cursor-default !select-none")}
+		<div class={cls}
+				style={style}
 				tabIndex={0}
 				onFocus={handlers.handleFocus}
 				onBlur={handlers.handleBlur}

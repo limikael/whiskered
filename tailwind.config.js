@@ -1,5 +1,6 @@
 module.exports = {
   content: ["./src/**/*.jsx"],
+  prefix: "we-",
   theme: {
     extend: {
     },

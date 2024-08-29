@@ -2,7 +2,7 @@ import {useConstructor} from "../utils/react-util.jsx";
 import {useState} from "react";
 import WhiskerEd from "../whiskered/WhiskerEd.jsx";
 import {useWhiskerEdState} from "../whiskered/WhiskerEdState.js"
-import {parse as parseXml} from "txml/txml";
+import {txmlParse} from "../utils/txml-stringify.js";
 import DocTree from "../doctree/DocTree.jsx";
 import {Head} from "isoq";
 import {classStringRemove, classStringAdd} from "../utils/js-util.js";
@@ -11,7 +11,7 @@ let LIBRARY={
 	div: {containerType: "children"},
 	span: {containerType: "richtext"},
 	Hello({color, children}) {
-		return (<div class="border p-5 m-5" style={`background-color: ${color};`}>
+		return (<div class="we-border we-p-5 we-m-5" style={`background-color: ${color};`}>
 			The hello component...
 			<div style="padding: 5px">
 				{children}
@@ -20,7 +20,7 @@ let LIBRARY={
 	},
 
 	Test({color, children}) {
-		return (<div class="border p-5" style={`background-color: ${color}`}>
+		return (<div class="we-border we-p-5" style={`background-color: ${color}`}>
 			The test component
 			<div style="padding: 5px">
 				{children}
@@ -29,13 +29,13 @@ let LIBRARY={
 	},
 
 	Inline() {
-		return (<div class="border p-5 inline-block" style={`background-color: #88f`}>
+		return (<div class="we-border we-p-5 we-inline-block" style={`background-color: #88f`}>
 			Inline
 		</div>)
 	},
 
 	Flex({children}) {
-		return (<div class="border" style={`background-color: #ffc0c0;`}>
+		return (<div class="we-border" style={`background-color: #ffc0c0;`}>
 			<div style="padding: 5px; display: flex">
 				{children}
 			</div>
@@ -44,7 +44,7 @@ let LIBRARY={
 
 	Text({children}) {
 		return (
-			<div class="border p-5">
+			<div class="we-border we-p-5">
 				{children}
 			</div>
 		)
@@ -62,7 +62,7 @@ function ComponentLibraryItem({name, item}) {
 	}
 
 	return (
-		<div class="border m-5 p-5 bg-grey"
+		<div class="we-border we-m-5 we-p-5 we-bg-grey"
 				draggable={true}
 				onDragStart={handleDragStart}>
 			{name}
@@ -72,11 +72,13 @@ function ComponentLibraryItem({name, item}) {
 
 function ComponentLibrary({componentLibrary}) {
 	return (<>
-		<div class="font-bold text-xl mb-2">Library</div>
-		<input type="text" class="border p-2 mb-2" value="dummy input"/>
-		{Object.keys(componentLibrary).map(name=>
-			<ComponentLibraryItem name={name} item={componentLibrary[name]}/>
-		)}
+		<div class="we-overflow-y-auto we-h-full we-p-5">
+			<div class="we-font-bold we-text-xl we-mb-2">Library</div>
+			<input type="text" class="we-border we-p-2 we-mb-2 we-w-full" value="dummy input"/>
+			{Object.keys(componentLibrary).map(name=>
+				<ComponentLibraryItem name={name} item={componentLibrary[name]}/>
+			)}
+		</div>
 	</>);
 }
 
@@ -88,7 +90,7 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 	else if (value)
 		label=value.tagName;
 
-	let outerClass="border-b py-[2px] hover:bg-lightgrey";
+	let outerClass="we-border-b we-py-[2px] hover:we-bg-lightgrey";
 	let outerStyle={
 		paddingLeft: (16+(level*16))+"px",
 	};
@@ -97,7 +99,7 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 	let innerStyle={};
 	switch (highlight) {
 		case "dropInside":
-			innerClass+=" outline outline-2 -outline-offset-2";
+			innerClass+=" we-outline we-outline-2 -we-outline-offset-2";
 			break;
 
 		case "dropAbove":
@@ -109,23 +111,23 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 			break;
 
 		case "selected":
-			outerClass=classStringRemove(outerClass,"hover:bg-lightgrey");
+			outerClass=classStringRemove(outerClass,"hover:we-bg-lightgrey");
 			if (focus)
-				outerClass+=" bg-grey";
+				outerClass+=" we-bg-grey";
 
 			else
-				outerClass+=" bg-grey/50";
+				outerClass+=" we-bg-grey/50";
 			break;
 
 		case "hover":
-			outerClass=classStringAdd(outerClass,"outline outline-1 outline-dashed -outline-offset-4 hover:outline-none");
+			outerClass=classStringAdd(outerClass,"we-outline we-outline-1 we-outline-dashed -we-outline-offset-4 hover:we-outline-none");
 			break;
 	}
 
 	if (value===undefined) 
 		return (
 			<div style={outerStyle}>
-				<div style={innerStyle} class="h-1"/>
+				<div style={innerStyle} class="we-h-1"/>
 			</div>
 		);
 
@@ -134,7 +136,7 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 				onMouseDown={onSelect}>
 			<div style={innerStyle} class={innerClass}>
 				{expandable && expanded &&
-					<span class="inline-block w-[24px] material-symbols-outlined"
+					<span class="we-inline-block we-w-[24px] material-symbols-outlined"
 							style="vertical-align: middle"
 							onClick={ev=>{ev.stopPropagation(); onToggleExpand()}}
 							onMouseDown={ev=>ev.stopPropagation()}>
@@ -142,7 +144,7 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 					</span>
 				}
 				{expandable && !expanded &&
-					<span class="inline-block w-[24px] material-symbols-outlined"
+					<span class="we-inline-block we-w-[24px] material-symbols-outlined"
 							style="vertical-align: middle"
 							onClick={ev=>{ev.stopPropagation(); onToggleExpand()}}
 							onMouseDown={ev=>ev.stopPropagation()}>
@@ -150,7 +152,7 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 					</span>
 				}
 				{!expandable &&
-					<span class="inline-block w-[24px]"/>
+					<span class="we-inline-block we-w-[24px]"/>
 				}
 				{label}
 			</div>
@@ -159,7 +161,8 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 }
 
 export default function() {
-	let [value,setValue]=useState(()=>parseXml(`
+	//let [value,setValue]=useState([]);
+	let [value,setValue]=useState(()=>txmlParse(`
 		<div>
 			<span>this is a span in a div</span>
 		</div>
@@ -176,56 +179,30 @@ export default function() {
 
 	let [selection,setSelection]=useState();
 
-	/*let [value,setValue]=useState(()=>parseXml(`
-		<Hello color="#e0d0c0">
-			This text shouldn't be here but it is kind of long...
-			<Text>
-				he<b>ll</b>o world
-				<Bla/><Hello>test</Hello>
-			</Text>
-		</Hello>
-		<Test>
-			Shoudln't be here
-			<Hello>
-			</Hello>
-		</Test>
-		<Undef>
-			Hello text
-			<Text>
-				hello world again
-			</Text>
-		</Undef>
-		<Text>
-			hello world again
-		</Text>
-	`));*/
-
-	//console.log("render, sel: ",selection);
-
 	return (<>
         <Head>
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
         </Head>
-		<div class="flex absolute top-0 left-0 h-full w-full">
-			<div class="w-60 shrink-0 p-5">
+		<div class="we-flex we-absolute we-top-0 we-left-0 we-h-full we-w-full">
+			<div class="we-w-60 we-shrink-0 we-h-full">
 				<ComponentLibrary componentLibrary={LIBRARY}/>
 			</div>
-			<div class="grow relative">
+			<div class="we-grow we-relative">
 				<WhiskerEd 
 						value={value}
 						onChange={v=>setValue(v)}
 						selection={selection}
 						onSelectionChange={s=>setSelection(s)}
 						componentLibrary={LIBRARY}
-						class="absolute top-0 bottom-0 left-0 right-0 overflow-auto"/>
+						class="we-absolute we-top-0 we-bottom-0 we-left-0 we-right-0 we-overflow-auto"/>
 			</div>
-			<div class="w-60 shrink-0 p-5">
+			<div class="we-w-60 we-shrink-0 we-p-5">
 				<DocTree 
 					value={value}
 					onChange={v=>setValue(v)}
 					selection={selection}
 					onSelectionChange={s=>setSelection(s)}
-					class="border-t h-full"
+					class="we-border-t we-h-full"
 					itemRenderer={DocTreeItem}
 					componentLibrary={LIBRARY}/>
 			</div>

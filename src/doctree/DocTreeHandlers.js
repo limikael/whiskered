@@ -1,7 +1,6 @@
 import {arrayRemove} from "../utils/js-util.js";
 import {xmlFind, xmlFragment, xmlIndex, xmlMove} from "../utils/xml-util.js";
 import {nodePred, nodeId, nodeClean, nodeInit} from "../whiskered/whiskered-util.js";
-import {parse as parseXml} from "txml/txml";
 import {txmlStringify} from "../utils/txml-stringify.js";
 
 export default class DocTreeHandlers {

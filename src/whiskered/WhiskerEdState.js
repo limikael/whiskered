@@ -1,5 +1,5 @@
 import {useConstructor} from "../utils/react-util.jsx";
-import {xmlMap, xmlFind, xmlPath, xmlParent, xmlIndex} from "../utils/xml-util.js";
+import {xmlForEach, xmlFind, xmlPath, xmlParent, xmlIndex} from "../utils/xml-util.js";
 import {elMidpoint, pDist, pSub, pDot, elIsOnEdge} from "../utils/ui-util.js";
 import BidirectionalMap from "../utils/BidirectionalMap.js";
 import {txmlStringify} from "../utils/txml-stringify.js";
@@ -14,7 +14,7 @@ export default class WhiskerEdState {
 	}
 
 	preRender({value, componentLibrary, selection}) {
-		xmlMap(value,nodeInit);
+		xmlForEach(value,nodeInit);
 		this.value=value;
 		this.componentLibrary=componentLibrary;
 		if (selection)

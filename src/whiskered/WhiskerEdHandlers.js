@@ -100,6 +100,7 @@ export default class WhiskerEdHandlers {
 	}
 
 	handleDragEnter=(ev)=>{
+		//console.log("drag enter");
 		ev.preventDefault();
 		let prev=this.whiskerEdState.selection.clone();
 		this.whiskerEdState.selection.changeDragCount(1);
@@ -108,9 +109,10 @@ export default class WhiskerEdHandlers {
 	}
 
 	handleDragLeave=(ev)=>{
+		//console.log("drag leave");
 		ev.preventDefault();
 		let prev=this.whiskerEdState.selection.clone();
-		this.whiskerEdState.selection.changeDragCount(1);
+		this.whiskerEdState.selection.changeDragCount(-1);
 		if (!prev.equals(this.whiskerEdState.selection))
 			this.notifySelectionChange();
 	}
@@ -153,11 +155,14 @@ export default class WhiskerEdHandlers {
 					fragment=xmlFind(fragment,nodePred(dpi)).children;
 
 				let childNode=txmlParse(dropData)[0];
+				nodeInit(childNode);
 				fragment.splice(this.whiskerEdState.selection.dropInsertIndex,0,childNode);
+				this.whiskerEdState.selection.selectedId=nodeId(childNode);
 			}
 		}
 
 		this.whiskerEdState.selection.clearDrag();
+		this.notifySelectionChange();
 		this.notifyValueChange();
 	}
 

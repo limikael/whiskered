@@ -2,6 +2,9 @@ import {isStringy} from "../utils/js-util.js";
 
 export function nodePred(id) {
 	return (node=>{
+		if (node===undefined ||
+				id===undefined)
+			return;
 		//console.log(node);
 
 		if (isStringy(node)) {
@@ -31,4 +34,6 @@ export function nodeId(node) {
 export function nodeClean(node) {
 	if (!isStringy(node))
 		delete node.attributes["whiskered:id"];
+
+	return node;
 }

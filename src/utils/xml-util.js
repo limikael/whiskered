@@ -1,15 +1,15 @@
 import {parse as parseXml} from "txml/txml";
-import {arrayMove} from "./js-util.js";
+import {arrayMove, isStringy} from "./js-util.js";
 
-export function xmlMap(element, fn) {
+export function xmlForEach(element, fn) {
 	if (element===undefined) return;
 	if (Array.isArray(element)) {
-		element.map(node=>xmlMap(node,fn));
+		element.forEach(node=>xmlForEach(node,fn));
 		return;
 	}
 
 	fn(element);
-	xmlMap(element.children,fn);
+	xmlForEach(element.children,fn);
 }
 
 export function xmlFind(element, fn) {
@@ -117,4 +117,21 @@ export function xmlMove(root, fn, newFragment, newIndex) {
 		newIndex--;
 
 	newFragment.splice(newIndex,0,val);//oldFragment[oldIndex]);
+}
+
+export function xmlMap(element, fn) {
+	if (element===undefined)
+		return;
+
+	if (Array.isArray(element))
+		return (element
+			.map(n=>xmlMap(n,fn))
+			.filter(i=>i!==undefined));
+
+	if (isStringy(element))
+		return fn(element);
+
+	element=fn(element);
+	element.children=xmlMap(element.children,fn);
+	return element;
 }
