@@ -137,6 +137,9 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 	if (!Component)
 		Component=({children})=><div>Undefined: {node.tagName} {children}</div>
 
+	if (Component.editorPreview)
+		Component=Component.editorPreview;
+
 	return (
 		<InterjectRender
 				interjectComponent={Component}

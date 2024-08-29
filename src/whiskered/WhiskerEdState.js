@@ -27,7 +27,11 @@ export default class WhiskerEdState {
 			this.selection=new WhiskerEdSelection();
 	}
 
+	// todo: when is this not an element?
 	setNodeEl(nodeId, el) {
+		if (!(el instanceof Element))
+			el=null;
+
 		if (!el) {
 			this.elById.delete(nodeId)
 			return;
@@ -76,11 +80,13 @@ export default class WhiskerEdState {
 
 		for (let i=0; i<fragment.length; i++) {
 			let el=this.elById.get(nodeId(fragment[i]));
-			let dist=elPointDist(el,mouseLocation);
-			if (closestDist===undefined ||
-					dist<closestDist) {
-				closestIndex=i;
-				closestDist=dist;
+			if (el) {
+				let dist=elPointDist(el,mouseLocation);
+				if (closestDist===undefined ||
+						dist<closestDist) {
+					closestIndex=i;
+					closestDist=dist;
+				}
 			}
 		}
 
