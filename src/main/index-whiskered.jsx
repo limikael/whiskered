@@ -53,8 +53,9 @@ let LIBRARY={
 
 LIBRARY.Hello.containerType="children";
 LIBRARY.Flex.containerType="children";
-LIBRARY.Flex.layoutDirection="right";
+LIBRARY.Flex.childLayoutDirection=()=>"right";
 LIBRARY.Text.containerType="richtext";
+LIBRARY.Inline.layoutDirection=()=>"right";
 
 function ComponentLibraryItem({name, item}) {
 	function handleDragStart(ev) {
@@ -163,18 +164,17 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 export default function() {
 	//let [value,setValue]=useState([]);
 	let [value,setValue]=useState(()=>txmlParse(`
-		<div>
-			<span>this is a span in a div</span>
-		</div>
-		<Hello color="#e0d0c0">
-			<Test color="#ffc0c0"/>
-			<Test color="#c0c0ff"/>
-			<Hello color="#ffffc0">
-				<Test color="#c0ffc0"/>
-			</Hello>
-		</Hello>
 		<Hello color="#ff0000"/>
 		<Test color="#ffc0c0"/>
+		Small text block
+		<Flex>
+			<Hello/>
+			<Hello/>
+			<Hello/>
+		</Flex>
+		<Inline/>
+		<Inline/>
+		<Inline/>
 	`));
 
 	let [selection,setSelection]=useState();
@@ -189,6 +189,7 @@ export default function() {
 			</div>
 			<div class="we-grow we-relative">
 				<WhiskerEd 
+						edgeSize={10}
 						value={value}
 						onChange={v=>setValue(v)}
 						selection={selection}

@@ -1,16 +1,19 @@
 import {useConstructor} from "../utils/react-util.jsx";
 import {xmlForEach, xmlFind, xmlPath, xmlParent, xmlIndex} from "../utils/xml-util.js";
-import {elMidpoint, pDist, pSub, pDot, elIsOnEdge} from "../utils/ui-util.js";
+import {elMidpoint, elPointDist, pDist, pSub, pDot, elIsOnEdge} from "../utils/ui-util.js";
 import BidirectionalMap from "../utils/BidirectionalMap.js";
 import {txmlStringify} from "../utils/txml-stringify.js";
 import {nodeInit, nodePred, nodeId} from "./whiskered-util.js";
 import WhiskerEdSelection from "./WhiskerEdSelection.js";
 
 export default class WhiskerEdState {
-	constructor() {
+	constructor({edgeSize}) {
 		this.elById=new BidirectionalMap();
 		this.dragCount=0;
-		this.edgeSize=5;
+		this.edgeSize=edgeSize;
+
+		if (!this.edgeSize)
+			this.edgeSize=5;
 	}
 
 	preRender({value, componentLibrary, selection}) {
@@ -43,26 +46,25 @@ export default class WhiskerEdState {
 		}
 	}
 
-	/*isDrag() {
-		return (this.dragCount>0);
+	setHoverState({hoverId, dropParentId, dropInsertIndex}) {
+		this.selection.hoverId=hoverId;
+		this.selection.dropParentId=dropParentId;
+		this.selection.dropInsertIndex=dropInsertIndex;
 	}
 
-	isValidDrag() {
-		return (this.isDrag() && this.dropParentId!="illegal")
+	getNodeComponent(node) {
+		let Comp;
+		if (node && node.tagName)
+			Comp=this.componentLibrary[node.tagName];
+
+		return Comp;
 	}
 
-	changeDragCount(v) {
-		this.dragCount+=v;
-		if (this.dragCount<0)
-			this.dragCount=0;
-	}
+	getClosestChildIndex(parentId, mouseLocation) {
+		let fragment=this.value;
+		if (parentId)
+			fragment=xmlFind(this.value,nodePred(parentId)).children;
 
-	clearDrag() {
-		this.dragCount=0;
-		this.dragId=undefined;
-	}*/
-
-	getInsertIndex(fragment, mouseLocation, layoutDirection) {
 		let closestIndex=undefined;
 		let closestDist=undefined;
 		let layoutVectors={
@@ -73,14 +75,29 @@ export default class WhiskerEdState {
 		}
 
 		for (let i=0; i<fragment.length; i++) {
-			let c=fragment[i];
-			let mid=elMidpoint(this.elById.get(nodeId(c)));
-			let dist=pDist(mouseLocation,mid);
+			let el=this.elById.get(nodeId(fragment[i]));
+			let dist=elPointDist(el,mouseLocation);
 			if (closestDist===undefined ||
 					dist<closestDist) {
 				closestIndex=i;
 				closestDist=dist;
 			}
+		}
+
+		return closestIndex;
+	}
+
+	getDropInsertIndex(parentId, closestIndex, mouseLocation) {
+		let layoutDirection=this.getDropLayoutDirection(parentId,closestIndex);
+		let fragment=this.value;
+		if (parentId)
+			fragment=xmlFind(this.value,nodePred(parentId)).children;
+
+		let layoutVectors={
+			up: {x:0,y:-1},
+			right: {x:1,y:0},
+			down: {x:0,y:1},
+			left: {x:-1,y:0},
 		}
 
 		let insertIndex=0;
@@ -99,31 +116,45 @@ export default class WhiskerEdState {
 		return insertIndex;
 	}
 
-	setHoverState({hoverId, dropParentId, dropInsertIndex/*, dropLayoutDirection*/}) {
-		this.selection.hoverId=hoverId;
-		this.selection.dropParentId=dropParentId;
-		this.selection.dropInsertIndex=dropInsertIndex;
-		//this.dropLayoutDirection=dropLayoutDirection;
+	getDropLayoutDirection(parentId, index) {
+		let parentNode,parentComp;
+		let fragment=this.value;
+		if (parentId) {
+			parentNode=xmlFind(this.value,nodePred(parentId));
+			parentComp=this.getNodeComponent(parentNode);
+			fragment=parentNode.children;
+		}
+
+		let layoutDirection="down";
+		if (parentComp && parentComp.childLayoutDirection) {
+			if (typeof parentComp.childLayoutDirection=="function")
+				layoutDirection=parentComp.childLayoutDirection(parentNode.attributes,layoutDirection);
+
+			else
+				layoutDirection=parentComp.childLayoutDirection;
+		}
+
+		if (index>=fragment.length)
+			index=fragment.length-1;
+
+		let childNode=fragment[index];
+		let childComp=this.getNodeComponent(childNode);
+		if (childComp && childComp.layoutDirection) {
+			if (typeof childComp.layoutDirection=="function")
+				layoutDirection=childComp.layoutDirection(childNode.attributes,layoutDirection);
+
+			else
+				layoutDirection=childComp.layoutDirection;
+		}
+
+		return layoutDirection;
 	}
 
-	getNodeComponent(node) {
-		let Comp;
-		if (node && node.tagName)
-			Comp=this.componentLibrary[node.tagName];
-
-		return Comp;
-	}
-
-	getDropLayoutDirection() {
-		if (!this.selection.dropParentId)
-			return "down";
-
-		let node=xmlFind(this.value,nodePred(this.selection.dropParentId));
-		let Comp=this.getNodeComponent(node);
-		if (Comp && Comp.layoutDirection)
-			return Comp.layoutDirection;
-
-		return "down";
+	getCurrentDropLayoutDirection() {
+		return this.getDropLayoutDirection(
+			this.selection.dropParentId,
+			this.selection.dropInsertIndex
+		);
 	}
 
 	updateHover(el, mouseLocation) {
@@ -159,6 +190,13 @@ export default class WhiskerEdState {
 		}
 
 		// Set layout direction and index.
+		let closestIndex=this.getClosestChildIndex(dropParentId,mouseLocation);
+		let dropLayoutDirection=this.getDropLayoutDirection(dropParentId,closestIndex);
+		let dropInsertIndex=this.getDropInsertIndex(dropParentId,closestIndex,mouseLocation);
+
+		/*console.log(closestIndex);
+
+
 		let dropLayoutDirection="down";
 		let dropInsertIndex;
 		if (dropParentId) {
@@ -178,7 +216,7 @@ export default class WhiskerEdState {
 
 		else {
 			dropInsertIndex=this.getInsertIndex(this.value,mouseLocation,dropLayoutDirection);
-		}
+		}*/
 
 		// Not meaningful if dragged to same location.
 		if (this.selection.dragId) {

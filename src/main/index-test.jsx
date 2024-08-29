@@ -1,26 +1,22 @@
-export default function() {
-	console.log(<>
-		<div x="
-   5&lt;
-bla
+import {useRef} from "react";
+import {elPointDist} from "../utils/ui-util.js";
 
- hello">
-			<div>
-			<b>
-			&nbsp; world</b></div>
-		</div>
-	</>);
-	return (<>
-		<div x="5">
-			<div>hello <b>world</b></div>
-		</div>
-		<div>
-			<div>
-				hello 
-				<b>
-					world
-				</b>
+export default function() {
+	let elRef=useRef();
+
+	function handleClick(ev) {
+		let el=elRef.current;
+		let p={x: ev.clientX, y: ev.clientY};
+
+		console.log(elPointDist(el,p));
+	}
+
+	return (
+		<div class="we-p-40 we-cursor-pointer"
+				onClick={handleClick}>
+			<div class="we-p-20 we-bg-black we-text-white" ref={elRef}>
+				Hello
 			</div>
 		</div>
-	</>)
+	);
 }

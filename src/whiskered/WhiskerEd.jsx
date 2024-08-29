@@ -8,8 +8,6 @@ import {nodeId, nodePred} from "./whiskered-util.js";
 import {xmlFind} from "../utils/xml-util.js";
 
 function WhiskerEdStyle() {
-//				outline-offset: -2px;
-
 	return (
 		<style>{`
 			.ed-drag {
@@ -183,7 +181,7 @@ function createWhiskerEdClasses(whiskerEdState) {
 				"left": ["ed-drag-right","ed-drag-left"],
 			}
 
-			let dropClasses=directionDropClasses[whiskerEdState.getDropLayoutDirection()];
+			let dropClasses=directionDropClasses[whiskerEdState.getCurrentDropLayoutDirection()];
 
 			let di=whiskerEdState.selection.dropInsertIndex;
 			if (di===undefined)
@@ -208,8 +206,9 @@ function createWhiskerEdClasses(whiskerEdState) {
 	return classes;	
 }
 
-export default function WhiskerEd({value, onChange, selection, onSelectionChange, componentLibrary, class: cls}) {
-	let whiskerEdState=useConstructor(()=>new WhiskerEdState());
+export default function WhiskerEd({value, onChange, selection, onSelectionChange, 
+		componentLibrary, class: cls, edgeSize}) {
+	let whiskerEdState=useConstructor(()=>new WhiskerEdState({edgeSize}));
 	whiskerEdState.preRender({value, selection, componentLibrary});
 
 	let forceUpdate=useForceUpdate();

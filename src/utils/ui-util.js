@@ -1,3 +1,37 @@
+export function elPointDist(el, p) {
+	let r=el.getBoundingClientRect();
+
+	if (p.x>=r.left && p.x<=r.right &&
+			p.y>=r.top && p.y<=r.bottom)
+		return 0;
+
+	if (p.x<r.left && p.y<r.top)
+		return pDist(p,{x:r.left,y:r.top});
+
+	if (p.x>r.right && p.y<r.top)
+		return pDist(p,{x:r.right,y:r.top});
+
+	if (p.x<r.left && p.y>r.bottom)
+		return pDist(p,{x:r.left,y:r.bottom});
+
+	if (p.x>r.right && p.y>r.bottom)
+		return pDist(p,{x:r.right,y:r.bottom});
+
+	if (p.y<r.top)
+		return pLineDist(p,{x:r.left,y:r.top},{x:0,y:-1});
+
+	if (p.y>r.bottom)
+		return pLineDist(p,{x:r.left,y:r.bottom},{x:0,y:1});
+
+	if (p.x<r.left)
+		return pLineDist(p,{x:r.left,y:r.top},{x:-1,y:0});
+
+	if (p.x>r.right)
+		return pLineDist(p,{x:r.right,y:r.top},{x:1,y:0});
+
+	throw new Error("the rect is strange!!!");
+}
+
 export function elLocalCoords(el, c) {
 	let rect=el.getBoundingClientRect();
 
@@ -41,6 +75,10 @@ export function pDist(a, b) {
 	let x=a.x-b.x;
 	let y=a.y-b.y;
 	return Math.sqrt(x*x+y*y);
+}
+
+export function pLineDist(p, lp, ln) {
+	return pDot(ln,pSub(p,lp))
 }
 
 export function pSub(a, b) {
