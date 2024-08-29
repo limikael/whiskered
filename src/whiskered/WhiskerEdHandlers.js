@@ -158,6 +158,12 @@ export default class WhiskerEdHandlers {
 				nodeInit(childNode);
 				fragment.splice(this.whiskerEdState.selection.dropInsertIndex,0,childNode);
 				this.whiskerEdState.selection.selectedId=nodeId(childNode);
+
+				let g=ev.dataTransfer.getData("whiskered-set-global");
+				if (g) {
+					//console.log("setting global to signal drop handled: "+g);
+					globalThis[g]=true;
+				}
 			}
 		}
 
