@@ -21,6 +21,6 @@
   },
   "exports": {
     ".": "./src/main/lib.js",
-    "./isomain": "./src/main/index-whiskered.jsx"
+    "./isomain": "./src/main/index-test.jsx"
   }
 }
