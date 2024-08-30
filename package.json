@@ -1,7 +1,6 @@
 {
   "name": "whiskered",
   "license": "UNLICENSED",
-  "private": true,
   "scripts": {
     "start": "katnip dev",
     "dev": "katnip dev",
