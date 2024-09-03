@@ -60,7 +60,7 @@ export function ContentEditable({class: className, style, initialValue, onChange
 	let ref=useRef();
 
 	function handleInput(ev) {
-		console.log("change ",ev.target.innerHTML);
+		//console.log("change ",ev.target.innerHTML);
 
 		if (!onChange)
 			return;
