@@ -43,14 +43,21 @@ export function InterjectRender({interjectComponent, interjectProps, ...props}) 
 	if (isStringy(interjectComponent))
 		el=createElement(interjectComponent.toString(),props,props.children);
 
-	else if (typeof interjectComponent=="function")
+	else if (typeof interjectComponent=="function") {
+		//console.log("interjecting function...");
 		el=interjectComponent(props);
+	}
 
 	else
 		throw new Error("expected component to be string or function");
 
 	interjectProps(el.props);
 	el=cloneElement(el,el.props);
+
+	// todo: need to call the old ref or something...
+	if (el.props.ref)
+		el.ref=el.props.ref;
+	//console.log(el);
 
 	return el;
 }
