@@ -81,6 +81,11 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 		props.onDragStart=handlers.handleDragStart;
 		props.onDragEnd=handlers.handleDragEnd;
 
+		if (isStringy(Component) && whiskerEdState.rewriteUrl) {
+			if (props.src)
+				props.src=whiskerEdState.rewriteUrl(props.src);
+		}
+
 		if (classes[id])
 			props.class=classStringAdd(props.class,classes[id]);
 	}
@@ -210,9 +215,9 @@ function createWhiskerEdClasses(whiskerEdState) {
 }
 
 export default function WhiskerEd({value, onChange, selection, onSelectionChange, 
-		componentLibrary, class: cls, edgeSize}) {
+		componentLibrary, class: cls, edgeSize, rewriteUrl}) {
 	let whiskerEdState=useConstructor(()=>new WhiskerEdState({edgeSize}));
-	whiskerEdState.preRender({value, selection, componentLibrary});
+	whiskerEdState.preRender({value, selection, componentLibrary, rewriteUrl});
 
 	let forceUpdate=useForceUpdate();
 	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate, onChange, onSelectionChange});
