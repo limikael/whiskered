@@ -7,7 +7,7 @@
     "test": "jasmine"
   },
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "dependencies": {
     "txml": "^5.1.1"
   },
