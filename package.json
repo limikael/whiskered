@@ -7,7 +7,7 @@
     "test": "jasmine"
   },
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "dependencies": {
     "txml": "^5.1.1"
   },
@@ -20,6 +20,6 @@
   },
   "exports": {
     ".": "./src/main/lib.js",
-    "./isomain": "./src/main/index-test.jsx"
+    "./isomain": "./src/main/index-whiskered.jsx"
   }
 }

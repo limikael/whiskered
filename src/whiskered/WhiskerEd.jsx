@@ -6,6 +6,7 @@ import WhiskerEdState from "./WhiskerEdState.js";
 import WhiskerEdHandlers from "./WhiskerEdHandlers.js";
 import {nodeId, nodePred} from "./whiskered-util.js";
 import {xmlFind} from "../utils/xml-util.js";
+import {Fragment, useCallback} from "react";
 
 function WhiskerEdStyle() {
 	return (
@@ -215,11 +216,16 @@ function createWhiskerEdClasses(whiskerEdState) {
 }
 
 export default function WhiskerEd({value, onChange, selection, onSelectionChange, 
-		componentLibrary, class: cls, edgeSize, rewriteUrl}) {
+		componentLibrary, class: cls, edgeSize, rewriteUrl,
+		wrapper}) {
 	let whiskerEdState=useConstructor(()=>new WhiskerEdState({edgeSize}));
 	whiskerEdState.preRender({value, selection, componentLibrary, rewriteUrl});
 
 	let forceUpdate=useForceUpdate();
+	let Wrapper=useCallback(wrapper,[]);
+	if (!Wrapper)
+		Wrapper=Fragment;
+
 	let handlers=new WhiskerEdHandlers({whiskerEdState, forceUpdate, onChange, onSelectionChange});
 	let style={
 		cursor: "defalt",
@@ -253,11 +259,13 @@ export default function WhiskerEd({value, onChange, selection, onSelectionChange
 				onDrop={handlers.handleDrop}
 				onDblClick={handlers.handleDblClick}>
 			<WhiskerEdStyle/>
-			<WhiskerEdFragment 
-				classes={createWhiskerEdClasses(whiskerEdState)}
-				whiskerEdState={whiskerEdState}
-				fragment={whiskerEdState.value}
-				handlers={handlers}/>
+			<Wrapper>
+				<WhiskerEdFragment 
+					classes={createWhiskerEdClasses(whiskerEdState)}
+					whiskerEdState={whiskerEdState}
+					fragment={whiskerEdState.value}
+					handlers={handlers}/>
+			</Wrapper>
 		</div>
 	);
 }

@@ -64,6 +64,7 @@ export default class WhiskerEdHandlers {
 	}*/
 
 	handleFocus=(ev)=>{
+		console.log("focus...");
 		if (this.whiskerEdState.focus)
 			return;
 
@@ -72,6 +73,7 @@ export default class WhiskerEdHandlers {
 	}
 
 	handleBlur=(ev)=> {
+		console.log("blur...");
 		if (!this.whiskerEdState.focus)
 			return;
 

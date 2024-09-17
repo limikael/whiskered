@@ -179,6 +179,14 @@ export default function() {
 
 	let [selection,setSelection]=useState();
 
+	function Wrapper({children}) {
+		return (
+			<div style="background-color: #80ff80; padding: 20px">
+				{children}
+			</div>
+		);
+	}
+
 	return (<>
         <Head>
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -189,6 +197,7 @@ export default function() {
 			</div>
 			<div class="we-grow we-relative">
 				<WhiskerEd 
+						wrapper={Wrapper}
 						edgeSize={10}
 						value={value}
 						onChange={v=>setValue(v)}
