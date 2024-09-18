@@ -161,6 +161,14 @@ function DocTreeItem({value, level, expandable, expanded, highlight, focus, onTo
 	)
 }
 
+	function Placeholder() {
+		return (
+			<div class="we-border we-border-2 we-rounded-lg we-border-dashed we-text-center we-font-2xl we-p-4">
+				+
+			</div>
+		)
+	}
+
 export default function() {
 	//let [value,setValue]=useState([]);
 	let [value,setValue]=useState(()=>txmlParse(`
@@ -204,7 +212,8 @@ export default function() {
 						selection={selection}
 						onSelectionChange={s=>setSelection(s)}
 						componentLibrary={LIBRARY}
-						class="we-absolute we-top-0 we-bottom-0 we-left-0 we-right-0 we-overflow-auto"/>
+						class="we-absolute we-top-0 we-bottom-0 we-left-0 we-right-0 we-overflow-auto"
+						placeholder={<Placeholder/>}/>
 			</div>
 			<div class="we-w-60 we-shrink-0 we-p-5">
 				<DocTree 

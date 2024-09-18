@@ -48,7 +48,7 @@ function WhiskerEdStyle() {
 	);
 }
 
-function WhiskerEdFragment({fragment, whiskerEdState, classes, handlers}) {
+function WhiskerEdFragment({fragment, whiskerEdState, classes, handlers, showPlaceholder}) {
 	return (<>
 		{fragment.map(c=>
 			<WhiskerEdNode 
@@ -57,6 +57,7 @@ function WhiskerEdFragment({fragment, whiskerEdState, classes, handlers}) {
 				classes={classes}
 				handlers={handlers}/>
 		)}
+		{(fragment.length==0) && showPlaceholder && whiskerEdState.placeholder}
 	</>);
 }
 
@@ -131,12 +132,17 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 	}
 
 	else {
+		let showPlaceholder=false;
+		if (Component && Component.containerType=="children")
+			showPlaceholder=true;
+
 		content=(
 			<WhiskerEdFragment
 					fragment={node.children}
 					whiskerEdState={whiskerEdState}
 					classes={classes}
-					handlers={handlers}/>
+					handlers={handlers}
+					showPlaceholder={showPlaceholder}/>
 		);
 	}
 
@@ -217,9 +223,9 @@ function createWhiskerEdClasses(whiskerEdState) {
 
 export default function WhiskerEd({value, onChange, selection, onSelectionChange, 
 		componentLibrary, class: cls, edgeSize, rewriteUrl,
-		wrapper}) {
+		wrapper, placeholder}) {
 	let whiskerEdState=useConstructor(()=>new WhiskerEdState({edgeSize}));
-	whiskerEdState.preRender({value, selection, componentLibrary, rewriteUrl});
+	whiskerEdState.preRender({value, selection, componentLibrary, rewriteUrl, placeholder});
 
 	let forceUpdate=useForceUpdate();
 	let Wrapper=useCallback(wrapper,[]);
@@ -264,6 +270,7 @@ export default function WhiskerEd({value, onChange, selection, onSelectionChange
 					classes={createWhiskerEdClasses(whiskerEdState)}
 					whiskerEdState={whiskerEdState}
 					fragment={whiskerEdState.value}
+					showPlaceholder={true}
 					handlers={handlers}/>
 			</Wrapper>
 		</div>
