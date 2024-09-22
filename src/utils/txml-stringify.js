@@ -87,11 +87,19 @@ export function txmlStringify(node, options) {
 		return node.map(n=>txmlStringify(n,options)).join("");
 
 	let attr="";
-	for (let k in node.attributes)
-		attr+=" "+k+'="'+escapeXmlAttr(node.attributes[k])+'"';
+	for (let k in node.attributes) {
+		if (typeof node.attributes[k]=="boolean" ||
+				node.attributes[k]===undefined) {
+			if (node.attributes[k]!==false)
+				attr+=" "+k;
+		}
+
+		else
+			attr+=" "+k+'="'+escapeXmlAttr(node.attributes[k])+'"';
+	}
 
 	let s=optionsPrettyIndent(options);
-	if (node.children.length) {
+	if (node.children && node.children.length) {
 		s+="<"+node.tagName+attr+">";
 		s+=optionsPrettyNewline(options);
 		s+=txmlStringify(node.children,{...options, level: options.level+1});
