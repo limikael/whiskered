@@ -65,8 +65,14 @@ function WhiskerEdNode({node, whiskerEdState, classes, handlers}) {
 	let Component;
 	if (!isStringy(node)) {
 		if (node.tagName.charAt(0).toLowerCase()==node.tagName.charAt(0)) {
-			Component=new String(node.tagName);
-			Object.assign(Component,whiskerEdState.componentLibrary[node.tagName]);
+			if (node.tagName=="img" && whiskerEdState.imgComponent) {
+				Component=whiskerEdState.imgComponent;
+			}
+
+			else {
+				Component=new String(node.tagName);
+				Object.assign(Component,whiskerEdState.componentLibrary[node.tagName]);
+			}
 		}
 
 		else {
@@ -223,9 +229,9 @@ function createWhiskerEdClasses(whiskerEdState) {
 
 export default function WhiskerEd({value, onChange, selection, onSelectionChange, 
 		componentLibrary, class: cls, edgeSize, rewriteUrl,
-		wrapper, placeholder}) {
+		wrapper, placeholder, imgComponent}) {
 	let whiskerEdState=useConstructor(()=>new WhiskerEdState({edgeSize}));
-	whiskerEdState.preRender({value, selection, componentLibrary, rewriteUrl, placeholder});
+	whiskerEdState.preRender({value, selection, componentLibrary, rewriteUrl, placeholder, imgComponent});
 
 	let forceUpdate=useForceUpdate();
 	let Wrapper=useCallback(wrapper,[]);

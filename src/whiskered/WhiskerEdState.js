@@ -16,12 +16,14 @@ export default class WhiskerEdState {
 			this.edgeSize=5;
 	}
 
-	preRender({value, componentLibrary, selection, rewriteUrl, placeholder}) {
+	preRender({value, componentLibrary, selection, rewriteUrl, placeholder, imgComponent}) {
 		xmlForEach(value,nodeInit);
 		this.value=value;
 		this.componentLibrary=componentLibrary;
 		this.rewriteUrl=rewriteUrl;
 		this.placeholder=placeholder;
+		this.imgComponent=imgComponent;
+
 		if (selection)
 			this.selection=selection;
 
